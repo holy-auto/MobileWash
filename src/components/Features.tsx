@@ -21,6 +21,15 @@ const features = [
   {
     icon: (
       <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M5.636 5.636a9 9 0 1012.728 0M12 3v9" />
+      </svg>
+    ),
+    title: "騒音ゼロ・排ガスゼロ\n早朝・深夜稼働もOK",
+    description: "全プロがバッテリー駆動の静音機材のみ使用。エンジン式の発電機・洗浄機は不可。マンションの早朝・深夜帯も近隣に配慮して稼働できます。",
+  },
+  {
+    icon: (
+      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
         <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>
     ),
@@ -34,7 +43,25 @@ const features = [
       </svg>
     ),
     title: "認定プロのみ、\n品質と保険補償",
-    description: "全プロは技能審査・身元確認済み。施工中の保険補償も完備、再施工保証もあります。",
+    description: "全プロは技能審査・身元確認済み。施工中の保険補償（請負業者賠償・受託物保管者賠償・PL）も団体加入で完備、再施工保証もあります。",
+  },
+  {
+    icon: (
+      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
+      </svg>
+    ),
+    title: "完全排水回収、\n植物由来洗剤のみ",
+    description: "排水回収トレイで施工水を全件回収、洗剤は植物由来のみ使用。マンション管理組合・住宅街・私有地でも環境負荷を最小化します。",
+  },
+  {
+    icon: (
+      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+      </svg>
+    ),
+    title: "4層チェックで\n品質を常時担保",
+    description: "お客様レビュー・運営の抜き打ち訪問・第三者品質監査員・お客様モニター制度の4層で施工品質をモニタリング。",
   },
   {
     icon: (
@@ -74,7 +101,7 @@ export default function Features() {
           </h2>
           <p className="text-[15px] text-[#5a7090] leading-relaxed">
             スマホひとつで、出張洗車・出張コーティングのプロをあなたの元へ。
-            6つの強みで、車のお手入れを変えていきます。
+            9つの強みで、車のお手入れを変えていきます。
           </p>
         </div>
 
