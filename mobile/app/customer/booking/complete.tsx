@@ -5,10 +5,12 @@ import {
   StyleSheet,
   TouchableOpacity,
   SafeAreaView,
+  ScrollView,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Spacing, FontSize, BorderRadius } from '@/constants/colors';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Colors, Gradients, Spacing, FontSize, BorderRadius } from '@/constants/colors';
 import { COMPLETION } from '@/constants/business-rules';
 import { showInterstitial, preloadInterstitial } from '@/lib/admob';
 import AdBanner from '@/components/AdBanner';
@@ -16,6 +18,12 @@ import RewardedAdButton from '@/components/RewardedAdButton';
 import { saveCoupon } from '@/lib/coupons';
 import { shouldTriggerAudit, createAuditRequest } from '@/lib/quality-audit';
 import { useAuth } from '../../_layout';
+import {
+  AnimatedNumber,
+  ConfettiBurst,
+  FadeInView,
+  GradientButton,
+} from '@/components/excitement';
 
 export default function CompleteScreen() {
   const router = useRouter();
@@ -70,7 +78,6 @@ export default function CompleteScreen() {
   };
 
   const handleDispute = () => {
-    // Navigate to dispute/claim form
     router.dismissAll();
   };
 
@@ -80,49 +87,73 @@ export default function CompleteScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        {/* Success Icon */}
-        <View style={styles.iconCircle}>
-          <Ionicons name="checkmark-done" size={56} color={Colors.white} />
-        </View>
-
-        <Text style={styles.title}>
-          {isAutoCompleted ? '自動完了しました' : 'サービス完了！'}
-        </Text>
-
-        {isAutoCompleted && (
-          <Text style={styles.autoNote}>
-            {COMPLETION.CONFIRMATION_TIMEOUT_MIN}分以内に確認がなかったため自動完了しました
-          </Text>
-        )}
-
-        <Text style={styles.proName}>{params.proName}</Text>
+      {!isAutoCompleted && <ConfettiBurst count={42} duration={2000} originY={180} />}
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        {/* Hero success card */}
+        <FadeInView>
+          <LinearGradient
+            colors={
+              (isAutoCompleted ? Gradients.brandCta : Gradients.sunset) as unknown as readonly [
+                string,
+                string,
+                ...string[]
+              ]
+            }
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.heroCard}
+          >
+            <View style={styles.heroSheen} pointerEvents="none" />
+            <View style={styles.iconCircle}>
+              <Ionicons name="checkmark-done" size={56} color={Colors.white} />
+            </View>
+            <Text style={styles.title}>
+              {isAutoCompleted ? '自動完了しました' : 'サービス完了！'}
+            </Text>
+            {isAutoCompleted ? (
+              <Text style={styles.autoNote}>
+                {COMPLETION.CONFIRMATION_TIMEOUT_MIN}分以内に確認がなかったため自動完了しました
+              </Text>
+            ) : (
+              <Text style={styles.celebrate}>愛車がピカピカに ✨</Text>
+            )}
+            <Text style={styles.proName}>{params.proName}</Text>
+          </LinearGradient>
+        </FadeInView>
 
         {/* Summary */}
-        <View style={styles.summaryCard}>
+        <FadeInView delay={150} style={styles.summaryCard}>
           <View style={styles.summaryRow}>
             <Text style={styles.summaryLabel}>お支払い金額</Text>
-            <Text style={styles.summaryValue}>¥{totalPrice.toLocaleString()}</Text>
+            <AnimatedNumber
+              value={totalPrice}
+              duration={1100}
+              prefix="¥"
+              style={styles.summaryValue}
+            />
           </View>
+          <View style={styles.divider} />
           <View style={styles.summaryRow}>
             <Text style={styles.summaryLabel}>ステータス</Text>
             <View style={styles.statusBadge}>
+              <View style={styles.statusDot} />
               <Text style={styles.statusBadgeText}>決済完了</Text>
             </View>
           </View>
-        </View>
+        </FadeInView>
 
         {/* Actions */}
-        <View style={styles.actions}>
-          <TouchableOpacity style={styles.reviewBtn} onPress={handleReview}>
-            <Ionicons name="star" size={20} color={Colors.white} />
-            <Text style={styles.reviewBtnText}>レビューを書く</Text>
-          </TouchableOpacity>
+        <FadeInView delay={250} style={styles.actions}>
+          <GradientButton
+            label="レビューを書く"
+            icon="star"
+            variant="gold"
+            size="lg"
+            onPress={handleReview}
+          />
 
-          {/* リワード広告 — 動画視聴でクーポンGET */}
           <RewardedAdButton onRewardEarned={handleRewardEarned} />
 
-          {/* パートナー広告 — 完了画面用 */}
           <AdBanner placement="order_complete" />
 
           <TouchableOpacity style={styles.disputeBtn} onPress={handleDispute}>
@@ -135,8 +166,8 @@ export default function CompleteScreen() {
           <TouchableOpacity style={styles.doneBtn} onPress={handleDone}>
             <Text style={styles.doneBtnText}>ホームに戻る</Text>
           </TouchableOpacity>
-        </View>
-      </View>
+        </FadeInView>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -144,50 +175,128 @@ export default function CompleteScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
   content: {
-    flex: 1, justifyContent: 'center', alignItems: 'center', padding: Spacing.lg,
+    padding: Spacing.lg,
+    paddingBottom: Spacing.xxl,
+  },
+
+  // Hero
+  heroCard: {
+    borderRadius: BorderRadius.xl,
+    paddingVertical: Spacing.xl,
+    paddingHorizontal: Spacing.lg,
+    alignItems: 'center',
+    overflow: 'hidden',
+    shadowColor: Colors.hotPink,
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.32,
+    shadowRadius: 22,
+    elevation: 10,
+  },
+  heroSheen: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: '50%',
+    backgroundColor: 'rgba(255,255,255,0.12)',
   },
   iconCircle: {
-    width: 120, height: 120, borderRadius: 60, backgroundColor: Colors.success,
-    justifyContent: 'center', alignItems: 'center', marginBottom: Spacing.lg,
+    width: 110,
+    height: 110,
+    borderRadius: 55,
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.45)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: Spacing.md,
   },
   title: {
-    fontSize: FontSize.xxl, fontWeight: '800', color: Colors.textPrimary, textAlign: 'center',
+    fontSize: FontSize.xxl + 2,
+    fontWeight: '900',
+    color: Colors.white,
+    textAlign: 'center',
+    letterSpacing: -0.3,
+  },
+  celebrate: {
+    fontSize: FontSize.md,
+    color: 'rgba(255,255,255,0.95)',
+    fontWeight: '700',
+    marginTop: 6,
+    letterSpacing: 0.4,
   },
   autoNote: {
-    fontSize: FontSize.sm, color: Colors.textMuted, textAlign: 'center',
+    fontSize: FontSize.sm,
+    color: 'rgba(255,255,255,0.85)',
+    textAlign: 'center',
     marginTop: Spacing.xs,
   },
   proName: {
-    fontSize: FontSize.lg, color: Colors.primary, fontWeight: '600', marginTop: Spacing.sm,
+    fontSize: FontSize.lg,
+    color: Colors.white,
+    fontWeight: '700',
+    marginTop: Spacing.sm,
   },
+
+  // Summary
   summaryCard: {
-    backgroundColor: Colors.card, borderRadius: BorderRadius.lg, padding: Spacing.lg,
-    width: '100%', marginTop: Spacing.xl,
-    shadowColor: Colors.shadow, shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 1, shadowRadius: 8, elevation: 3,
+    backgroundColor: Colors.card,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.lg,
+    marginTop: Spacing.lg,
+    shadowColor: Colors.shadow,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 14,
+    elevation: 3,
   },
   summaryRow: {
-    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     paddingVertical: Spacing.sm,
   },
-  summaryLabel: { fontSize: FontSize.md, color: Colors.textSecondary },
-  summaryValue: { fontSize: FontSize.xl, fontWeight: '800', color: Colors.textPrimary },
+  summaryLabel: { fontSize: FontSize.md, color: Colors.textSecondary, fontWeight: '600' },
+  summaryValue: {
+    fontSize: FontSize.xxl,
+    fontWeight: '900',
+    color: Colors.textPrimary,
+    fontVariant: ['tabular-nums'],
+    letterSpacing: -0.3,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: Colors.borderLight,
+    marginVertical: 6,
+  },
   statusBadge: {
-    backgroundColor: Colors.success + '20', paddingVertical: 4, paddingHorizontal: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.success + '18',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
     borderRadius: BorderRadius.full,
+    gap: 6,
   },
-  statusBadgeText: { fontSize: FontSize.sm, fontWeight: '600', color: Colors.success },
-  actions: { width: '100%', marginTop: Spacing.xl, gap: Spacing.md },
-  reviewBtn: {
-    flexDirection: 'row', justifyContent: 'center', alignItems: 'center',
-    backgroundColor: Colors.primary, paddingVertical: 16, borderRadius: BorderRadius.md,
-    gap: Spacing.sm,
+  statusDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
+    backgroundColor: Colors.success,
   },
-  reviewBtnText: { fontSize: FontSize.lg, fontWeight: '700', color: Colors.white },
+  statusBadgeText: { fontSize: FontSize.sm, fontWeight: '700', color: Colors.success },
+
+  // Actions
+  actions: { width: '100%', marginTop: Spacing.lg, gap: Spacing.md },
   disputeBtn: {
-    flexDirection: 'row', justifyContent: 'center', alignItems: 'center',
-    borderWidth: 1, borderColor: Colors.error, paddingVertical: 12,
-    borderRadius: BorderRadius.md, gap: Spacing.sm,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: Colors.error,
+    paddingVertical: 12,
+    borderRadius: BorderRadius.md,
+    gap: Spacing.sm,
   },
   disputeBtnText: { fontSize: FontSize.sm, fontWeight: '600', color: Colors.error },
   doneBtn: { alignItems: 'center', paddingVertical: Spacing.md },

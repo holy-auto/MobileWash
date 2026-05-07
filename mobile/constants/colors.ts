@@ -37,6 +37,41 @@ export const Colors = {
 
   // Overlay
   overlay: 'rgba(0, 0, 0, 0.5)',
+
+  // ─── Vibrant accent palette (excitement theme) ───
+  electric: '#00D4FF',
+  electricDeep: '#0EA5E9',
+  violet: '#8B5CF6',
+  violetSoft: '#C4B5FD',
+  hotPink: '#EC4899',
+  sunset: '#F97316',
+  mint: '#10B981',
+  lemon: '#FCD34D',
+  inkDeep: '#0B1B3A',
+  inkMid: '#162D4A',
+} as const;
+
+// ─── Gradients (consumed by expo-linear-gradient) ───
+// Tuples are typed to satisfy LinearGradient's `colors` prop.
+export const Gradients = {
+  // Deep navy hero (header / role-select background)
+  heroNavy: ['#0B1B3A', '#1E3A5F', '#2B5797'] as const,
+  // Aurora — playful brand pop
+  aurora: ['#3B82F6', '#8B5CF6', '#EC4899'] as const,
+  // Sky pop — cyan to violet
+  skyPop: ['#00D4FF', '#3B82F6', '#8B5CF6'] as const,
+  // Brand CTA — primary call to action
+  brandCta: ['#0EA5E9', '#3B82F6'] as const,
+  // Sunset — celebration / completion
+  sunset: ['#F97316', '#EC4899', '#8B5CF6'] as const,
+  // Mint — success / online status
+  mint: ['#10B981', '#00D4FF'] as const,
+  // Gold — premium / pro role
+  gold: ['#FCD34D', '#F59E0B', '#D4A574'] as const,
+  // Glass white — overlays on dark
+  glassWhite: ['rgba(255,255,255,0.95)', 'rgba(240,249,255,0.85)'] as const,
+  // Subtle background tint
+  bgTint: ['#FAFBFE', '#EFF6FF'] as const,
 } as const;
 
 export const Spacing = {

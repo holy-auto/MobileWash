@@ -9,8 +9,14 @@ import {
   Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { Colors, Spacing, FontSize, BorderRadius } from '@/constants/colors';
+import { Colors, Gradients, Spacing, FontSize, BorderRadius } from '@/constants/colors';
+import {
+  AnimatedNumber,
+  FadeInView,
+  SectionHeader,
+} from '@/components/excitement';
 import { useAuth } from '../_layout';
 import { signOut } from '@/lib/auth';
 import { LOYALTY } from '@/constants/business-rules';
@@ -68,79 +74,92 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <Text style={styles.title}>マイページ</Text>
 
-        {/* Profile Card */}
-        <View style={styles.profileCard}>
-          <View style={styles.avatar}>
-            <Ionicons name="person" size={32} color={Colors.primaryMedium} />
-          </View>
-          <View style={styles.profileInfo}>
-            <Text style={styles.profileName}>{userName}</Text>
-            <Text style={styles.profileEmail}>{email}</Text>
-          </View>
-          <TouchableOpacity>
-            <Ionicons name="chevron-forward" size={22} color={Colors.textMuted} />
-          </TouchableOpacity>
-        </View>
+        {/* Profile + Points hero card (gradient) */}
+        <FadeInView>
+          <LinearGradient
+            colors={Gradients.aurora as unknown as readonly [string, string, ...string[]]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.profileHero}
+          >
+            <View style={styles.heroSheen} pointerEvents="none" />
 
-        {/* Loyalty & Points Card */}
-        <View style={styles.loyaltyCard}>
-          <View style={styles.loyaltyHeader}>
-            <View style={styles.loyaltyTierBadge}>
+            <View style={styles.profileRow}>
+              <View style={styles.avatar}>
+                <Ionicons name="person" size={28} color={Colors.white} />
+              </View>
+              <View style={styles.profileInfo}>
+                <Text style={styles.profileName}>{userName}</Text>
+                <Text style={styles.profileEmail}>{email}</Text>
+              </View>
+              <TouchableOpacity style={styles.editButton}>
+                <Ionicons name="create-outline" size={18} color={Colors.white} />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.tierBadgeRow}>
               <View style={[styles.tierDot, { backgroundColor: currentTier.color }]} />
               <Text style={styles.tierName}>{currentTier.name}</Text>
               {currentTier.discount > 0 && (
                 <Text style={styles.tierDiscount}>{currentTier.discount}%OFF</Text>
               )}
+              {nextTier && (
+                <Text style={styles.nextTierHint}>
+                  → あと{(nextTier.minPoints - MOCK_LOYALTY.lifetimePoints).toLocaleString()}ptで{nextTier.name}
+                </Text>
+              )}
             </View>
-            {nextTier && (
-              <Text style={styles.nextTierHint}>
-                あと{(nextTier.minPoints - MOCK_LOYALTY.lifetimePoints).toLocaleString()}ptで{nextTier.name}
-              </Text>
-            )}
-          </View>
-          <View style={styles.pointsRow}>
-            <View style={styles.pointsMain}>
-              <Text style={styles.pointsValue}>{MOCK_LOYALTY.totalPoints.toLocaleString()}</Text>
-              <Text style={styles.pointsUnit}>pt</Text>
-            </View>
-            <TouchableOpacity style={styles.pointsUseButton}>
-              <Text style={styles.pointsUseText}>ポイントを使う</Text>
-            </TouchableOpacity>
-          </View>
-          {nextTier && (
-            <View style={styles.tierProgress}>
-              <View style={styles.tierProgressBar}>
-                <View
-                  style={[
-                    styles.tierProgressFill,
-                    {
-                      width: `${Math.min(100, (MOCK_LOYALTY.lifetimePoints / nextTier.minPoints) * 100)}%`,
-                      backgroundColor: currentTier.color,
-                    },
-                  ]}
+
+            <View style={styles.pointsRow}>
+              <View style={styles.pointsMain}>
+                <AnimatedNumber
+                  value={MOCK_LOYALTY.totalPoints}
+                  duration={1100}
+                  style={styles.pointsValue}
                 />
+                <Text style={styles.pointsUnit}>pt</Text>
               </View>
-              <Text style={styles.tierProgressText}>
-                {MOCK_LOYALTY.lifetimePoints.toLocaleString()} / {nextTier.minPoints.toLocaleString()} pt
-              </Text>
+              <TouchableOpacity style={styles.pointsUseButton}>
+                <Text style={styles.pointsUseText}>ポイントを使う</Text>
+                <Ionicons name="arrow-forward" size={14} color={Colors.violet} />
+              </TouchableOpacity>
             </View>
-          )}
-        </View>
+
+            {nextTier && (
+              <View style={styles.tierProgress}>
+                <View style={styles.tierProgressBar}>
+                  <View
+                    style={[
+                      styles.tierProgressFill,
+                      {
+                        width: `${Math.min(100, (MOCK_LOYALTY.lifetimePoints / nextTier.minPoints) * 100)}%`,
+                      },
+                    ]}
+                  />
+                </View>
+                <Text style={styles.tierProgressText}>
+                  {MOCK_LOYALTY.lifetimePoints.toLocaleString()} / {nextTier.minPoints.toLocaleString()} pt
+                </Text>
+              </View>
+            )}
+          </LinearGradient>
+        </FadeInView>
 
         {/* Coupons Section */}
-        <View style={styles.couponsSection}>
-          <View style={styles.sectionHeader}>
-            <View style={styles.sectionTitleRow}>
-              <Ionicons name="ticket-outline" size={20} color={Colors.primary} />
-              <Text style={styles.sectionTitle}>クーポン</Text>
+        <FadeInView delay={150} style={styles.couponsSection}>
+          <SectionHeader
+            title="クーポン"
+            eyebrow="MY COUPONS"
+            variant="sunset"
+            trailing={
               <View style={styles.couponCountBadge}>
                 <Text style={styles.couponCountText}>{MOCK_COUPONS.length}</Text>
               </View>
-            </View>
-          </View>
+            }
+          />
           {MOCK_COUPONS.map((coupon) => (
             <View key={coupon.id} style={styles.couponItem}>
               <View style={styles.couponLeft}>
@@ -152,41 +171,59 @@ export default function ProfileScreen() {
               </View>
             </View>
           ))}
-        </View>
+        </FadeInView>
 
         {/* Quick Actions */}
-        <View style={styles.quickActions}>
+        <FadeInView delay={220} style={styles.quickActions}>
           <TouchableOpacity
             style={styles.quickAction}
+            activeOpacity={0.85}
             onPress={() => router.push('/customer/gift' as any)}
           >
-            <View style={[styles.quickActionIcon, { backgroundColor: '#FEF3C7' }]}>
-              <Ionicons name="gift-outline" size={24} color="#F59E0B" />
-            </View>
+            <LinearGradient
+              colors={Gradients.gold as unknown as readonly [string, string, ...string[]]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.quickActionIcon}
+            >
+              <Ionicons name="gift" size={24} color={Colors.white} />
+            </LinearGradient>
             <Text style={styles.quickActionLabel}>ギフトを贈る</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.quickAction}
+            activeOpacity={0.85}
             onPress={() => router.push('/customer/subscription' as any)}
           >
-            <View style={[styles.quickActionIcon, { backgroundColor: '#DCFCE7' }]}>
-              <Ionicons name="repeat-outline" size={24} color="#22C55E" />
-            </View>
+            <LinearGradient
+              colors={Gradients.mint as unknown as readonly [string, string, ...string[]]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.quickActionIcon}
+            >
+              <Ionicons name="repeat" size={24} color={Colors.white} />
+            </LinearGradient>
             <Text style={styles.quickActionLabel}>定期コース</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.quickAction}
+            activeOpacity={0.85}
             onPress={() => router.push('/customer/booking/schedule' as any)}
           >
-            <View style={[styles.quickActionIcon, { backgroundColor: '#EDE9FE' }]}>
-              <Ionicons name="calendar-outline" size={24} color="#8B5CF6" />
-            </View>
+            <LinearGradient
+              colors={Gradients.aurora as unknown as readonly [string, string, ...string[]]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.quickActionIcon}
+            >
+              <Ionicons name="calendar" size={24} color={Colors.white} />
+            </LinearGradient>
             <Text style={styles.quickActionLabel}>日時予約</Text>
           </TouchableOpacity>
-        </View>
+        </FadeInView>
 
         {/* Stats */}
-        <View style={styles.statsRow}>
+        <FadeInView delay={300} style={styles.statsRow}>
           <View style={styles.statItem}>
             <Text style={styles.statValue}>3</Text>
             <Text style={styles.statLabel}>利用回数</Text>
@@ -201,10 +238,10 @@ export default function ProfileScreen() {
             <Text style={styles.statValue}>¥43k</Text>
             <Text style={styles.statLabel}>累計利用額</Text>
           </View>
-        </View>
+        </FadeInView>
 
         {/* Menu */}
-        <View style={styles.menu}>
+        <FadeInView delay={360} style={styles.menu}>
           {MENU_ITEMS.map((item, idx) => (
             <TouchableOpacity key={idx} style={styles.menuItem}>
               <Ionicons
@@ -216,7 +253,7 @@ export default function ProfileScreen() {
               <Ionicons name="chevron-forward" size={18} color={Colors.textMuted} />
             </TouchableOpacity>
           ))}
-        </View>
+        </FadeInView>
 
         {/* Login / Logout */}
         <TouchableOpacity style={styles.logoutButton} onPress={handleSignOut}>
@@ -251,23 +288,36 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
     marginBottom: Spacing.lg,
   },
-  profileCard: {
+  // Profile + points hero (gradient aurora)
+  profileHero: {
+    borderRadius: BorderRadius.xl,
+    padding: Spacing.lg,
+    overflow: 'hidden',
+    shadowColor: Colors.violet,
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.32,
+    shadowRadius: 22,
+    elevation: 8,
+  },
+  heroSheen: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: '45%',
+    backgroundColor: 'rgba(255,255,255,0.12)',
+  },
+  profileRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.card,
-    padding: Spacing.lg,
-    borderRadius: BorderRadius.lg,
-    shadowColor: Colors.shadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 8,
-    elevation: 3,
   },
   avatar: {
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: Colors.primaryFaint,
+    backgroundColor: 'rgba(255,255,255,0.22)',
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.35)',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -277,37 +327,30 @@ const styles = StyleSheet.create({
   },
   profileName: {
     fontSize: FontSize.lg,
-    fontWeight: '700',
-    color: Colors.textPrimary,
+    fontWeight: '800',
+    color: Colors.white,
+    letterSpacing: -0.2,
   },
   profileEmail: {
     fontSize: FontSize.sm,
-    color: Colors.textSecondary,
+    color: 'rgba(255,255,255,0.85)',
     marginTop: 2,
+    fontWeight: '500',
+  },
+  editButton: {
+    padding: 8,
+    borderRadius: BorderRadius.full,
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.25)',
   },
 
-  // Loyalty Card
-  loyaltyCard: {
-    backgroundColor: Colors.card,
-    borderRadius: BorderRadius.lg,
-    padding: Spacing.lg,
-    marginTop: Spacing.md,
-    shadowColor: Colors.shadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  loyaltyHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: Spacing.md,
-  },
-  loyaltyTierBadge: {
+  tierBadgeRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
+    marginTop: Spacing.lg,
+    flexWrap: 'wrap',
   },
   tierDot: {
     width: 10,
@@ -316,27 +359,30 @@ const styles = StyleSheet.create({
   },
   tierName: {
     fontSize: FontSize.md,
-    fontWeight: '700',
-    color: Colors.textPrimary,
+    fontWeight: '800',
+    color: Colors.white,
   },
   tierDiscount: {
     fontSize: FontSize.xs,
-    fontWeight: '700',
-    color: Colors.success,
-    backgroundColor: '#DCFCE7',
-    paddingHorizontal: 6,
-    paddingVertical: 1,
-    borderRadius: 4,
+    fontWeight: '800',
+    color: Colors.lemon,
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 6,
     overflow: 'hidden',
+    letterSpacing: 0.4,
   },
   nextTierHint: {
     fontSize: FontSize.xs,
-    color: Colors.textMuted,
+    color: 'rgba(255,255,255,0.85)',
+    fontWeight: '600',
   },
   pointsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-end',
+    marginTop: Spacing.md,
   },
   pointsMain: {
     flexDirection: 'row',
@@ -344,44 +390,56 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   pointsValue: {
-    fontSize: 32,
-    fontWeight: '800',
-    color: Colors.primary,
+    fontSize: 44,
+    fontWeight: '900',
+    color: Colors.white,
+    letterSpacing: -1,
+    fontVariant: ['tabular-nums'],
   },
   pointsUnit: {
     fontSize: FontSize.md,
-    fontWeight: '600',
-    color: Colors.primaryMedium,
+    fontWeight: '800',
+    color: 'rgba(255,255,255,0.85)',
   },
   pointsUseButton: {
-    backgroundColor: Colors.primaryFaint,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: Colors.white,
     paddingVertical: 8,
-    paddingHorizontal: 16,
+    paddingHorizontal: 14,
     borderRadius: BorderRadius.full,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.18,
+    shadowRadius: 6,
+    elevation: 3,
   },
   pointsUseText: {
     fontSize: FontSize.sm,
-    fontWeight: '700',
-    color: Colors.primary,
+    fontWeight: '800',
+    color: Colors.violet,
   },
   tierProgress: {
     marginTop: Spacing.md,
   },
   tierProgressBar: {
     height: 6,
-    backgroundColor: Colors.borderLight,
+    backgroundColor: 'rgba(255,255,255,0.22)',
     borderRadius: 3,
     overflow: 'hidden',
   },
   tierProgressFill: {
     height: '100%',
     borderRadius: 3,
+    backgroundColor: Colors.white,
   },
   tierProgressText: {
     fontSize: FontSize.xs,
-    color: Colors.textMuted,
+    color: 'rgba(255,255,255,0.85)',
     marginTop: 4,
     textAlign: 'right',
+    fontWeight: '600',
   },
 
   // Coupons
@@ -410,15 +468,16 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
   },
   couponCountBadge: {
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.hotPink,
     borderRadius: 10,
-    paddingHorizontal: 7,
-    paddingVertical: 1,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
   },
   couponCountText: {
     fontSize: FontSize.xs,
-    fontWeight: '700',
+    fontWeight: '800',
     color: Colors.white,
+    letterSpacing: 0.3,
   },
   couponItem: {
     flexDirection: 'row',
@@ -473,12 +532,17 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   quickActionIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: Spacing.sm,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.18,
+    shadowRadius: 8,
+    elevation: 3,
   },
   quickActionLabel: {
     fontSize: FontSize.xs,

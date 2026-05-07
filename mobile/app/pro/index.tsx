@@ -10,7 +10,14 @@ import {
   Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Spacing, FontSize, BorderRadius } from '@/constants/colors';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Colors, Gradients, Spacing, FontSize, BorderRadius } from '@/constants/colors';
+import {
+  AnimatedNumber,
+  FadeInView,
+  PulsingDot,
+  SectionHeader,
+} from '@/components/excitement';
 import { useAuth } from '../_layout';
 import { signOut } from '@/lib/auth';
 import {
@@ -173,30 +180,60 @@ export default function ProHome() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
-        {/* Header with GPS Toggle */}
-        <View style={styles.header}>
-          <View>
-            <Text style={styles.greeting}>{userName}</Text>
-            <Text style={styles.role}>プロモード</Text>
-          </View>
-          <TouchableOpacity
-            style={styles.logoutBtn}
-            onPress={() => signOut()}
+        {/* Hero earnings header */}
+        <FadeInView>
+          <LinearGradient
+            colors={Gradients.gold as unknown as readonly [string, string, ...string[]]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.proHero}
           >
-            <Ionicons name="log-out-outline" size={22} color={Colors.textSecondary} />
-          </TouchableOpacity>
-        </View>
+            <View style={styles.proHeroSheen} pointerEvents="none" />
+            <View style={styles.header}>
+              <View>
+                <Text style={styles.role}>★ PRO MODE</Text>
+                <Text style={styles.greeting}>{userName}</Text>
+              </View>
+              <TouchableOpacity
+                style={styles.logoutBtn}
+                onPress={() => signOut()}
+              >
+                <Ionicons name="log-out-outline" size={22} color={Colors.white} />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.heroEarningsRow}>
+              <View>
+                <Text style={styles.heroEarningsLabel}>本日の売上</Text>
+                <View style={styles.heroEarningsValueRow}>
+                  <Text style={styles.heroYen}>¥</Text>
+                  <AnimatedNumber
+                    value={MOCK_STATS.todayEarnings}
+                    duration={1100}
+                    style={styles.heroEarningsValue}
+                  />
+                </View>
+                <Text style={styles.heroEarningsHint}>
+                  今月累計 ¥{(MOCK_STATS.monthEarnings / 10000).toFixed(1)}万 / {MOCK_STATS.monthJobs}件
+                </Text>
+              </View>
+              <View style={styles.heroRating}>
+                <Ionicons name="star" size={16} color={Colors.white} />
+                <Text style={styles.heroRatingText}>{MOCK_STATS.rating}</Text>
+              </View>
+            </View>
+          </LinearGradient>
+        </FadeInView>
 
         {/* GPS Online Toggle */}
-        <View style={[styles.gpsCard, isOnline && styles.gpsCardOnline]}>
+        <FadeInView delay={120} style={[styles.gpsCard, isOnline && styles.gpsCardOnline]}>
           <View style={styles.gpsInfo}>
-            <View
-              style={[
-                styles.gpsIndicator,
-                { backgroundColor: isOnline ? Colors.success : Colors.textMuted },
-              ]}
-            />
-            <View>
+            {isOnline ? (
+              <PulsingDot color={Colors.mint} size={12} />
+            ) : (
+              <View style={[styles.gpsIndicator, { backgroundColor: Colors.textMuted }]} />
+            )}
+            <View style={{ flex: 1 }}>
               <Text style={[styles.gpsTitle, isOnline && styles.gpsTitleOnline]}>
                 {isOnline ? '出張受付中' : 'オフライン'}
               </Text>
@@ -212,11 +249,11 @@ export default function ProHome() {
             onValueChange={handleToggleOnline}
             trackColor={{
               false: Colors.border,
-              true: Colors.primarySoft,
+              true: Colors.mint,
             }}
-            thumbColor={isOnline ? Colors.primary : Colors.textMuted}
+            thumbColor={isOnline ? Colors.white : Colors.textMuted}
           />
-        </View>
+        </FadeInView>
 
         {/* GPS Coordinates */}
         {isOnline && currentCoords && (
@@ -229,37 +266,36 @@ export default function ProHome() {
         )}
 
         {/* Today's Stats */}
-        <View style={styles.statsGrid}>
-          <View style={styles.statCard}>
-            <Text style={styles.statValue}>
-              ¥{MOCK_STATS.todayEarnings.toLocaleString()}
-            </Text>
-            <Text style={styles.statLabel}>本日の売上</Text>
-          </View>
-          <View style={styles.statCard}>
+        <FadeInView delay={200} style={styles.statsGrid}>
+          <View style={[styles.statCard, styles.statCardAccent]}>
+            <Ionicons name="briefcase" size={18} color={Colors.electricDeep} />
             <Text style={styles.statValue}>{MOCK_STATS.todayJobs}</Text>
             <Text style={styles.statLabel}>本日の件数</Text>
           </View>
-          <View style={styles.statCard}>
+          <View style={[styles.statCard, styles.statCardAccent]}>
+            <Ionicons name="trending-up" size={18} color={Colors.mint} />
             <Text style={styles.statValue}>
               ¥{(MOCK_STATS.monthEarnings / 10000).toFixed(1)}万
             </Text>
             <Text style={styles.statLabel}>今月の売上</Text>
           </View>
-          <View style={styles.statCard}>
+          <View style={[styles.statCard, styles.statCardAccent]}>
+            <Ionicons name="people" size={18} color={Colors.violet} />
+            <Text style={styles.statValue}>{MOCK_STATS.totalReviews}</Text>
+            <Text style={styles.statLabel}>レビュー数</Text>
+          </View>
+          <View style={[styles.statCard, styles.statCardAccent]}>
             <View style={styles.ratingRow}>
-              <Ionicons name="star" size={16} color={Colors.gold} />
+              <Ionicons name="star" size={16} color={Colors.warning} />
               <Text style={styles.statValue}>{MOCK_STATS.rating}</Text>
             </View>
-            <Text style={styles.statLabel}>
-              評価 ({MOCK_STATS.totalReviews}件)
-            </Text>
+            <Text style={styles.statLabel}>平均評価</Text>
           </View>
-        </View>
+        </FadeInView>
 
         {/* Recent Jobs */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>本日の作業</Text>
+        <FadeInView delay={280} style={styles.section}>
+          <SectionHeader title="本日の作業" eyebrow="TODAY'S JOBS" variant="gold" />
           {MOCK_RECENT_JOBS.map((job) => (
             <View key={job.id} style={styles.jobCard}>
               <View style={styles.jobTime}>
@@ -301,7 +337,7 @@ export default function ProHome() {
               </View>
             </View>
           ))}
-        </View>
+        </FadeInView>
       </ScrollView>
     </SafeAreaView>
   );
@@ -316,27 +352,104 @@ const styles = StyleSheet.create({
     padding: Spacing.lg,
     paddingBottom: Spacing.xxl,
   },
+  // Pro hero (gradient gold)
+  proHero: {
+    borderRadius: BorderRadius.xl,
+    padding: Spacing.lg,
+    marginBottom: Spacing.md,
+    overflow: 'hidden',
+    shadowColor: '#F59E0B',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.32,
+    shadowRadius: 18,
+    elevation: 6,
+  },
+  proHeroSheen: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: '50%',
+    backgroundColor: 'rgba(255,255,255,0.18)',
+  },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: Spacing.md,
+    alignItems: 'flex-start',
   },
   greeting: {
-    fontSize: FontSize.xl,
-    fontWeight: '700',
-    color: Colors.textPrimary,
+    fontSize: FontSize.xxl,
+    fontWeight: '900',
+    color: Colors.white,
+    letterSpacing: -0.3,
+    marginTop: 2,
   },
   role: {
-    fontSize: FontSize.sm,
-    color: Colors.gold,
-    fontWeight: '600',
-    marginTop: 2,
+    fontSize: FontSize.xs,
+    color: Colors.white,
+    fontWeight: '800',
+    letterSpacing: 2.4,
   },
   logoutBtn: {
     padding: Spacing.sm,
     borderRadius: BorderRadius.full,
-    backgroundColor: Colors.offWhite,
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.25)',
+  },
+  heroEarningsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+    marginTop: Spacing.lg,
+  },
+  heroEarningsLabel: {
+    fontSize: FontSize.xs,
+    color: 'rgba(255,255,255,0.9)',
+    fontWeight: '700',
+    letterSpacing: 1.4,
+    textTransform: 'uppercase',
+  },
+  heroEarningsValueRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    marginTop: 4,
+    gap: 4,
+  },
+  heroYen: {
+    fontSize: FontSize.xl,
+    color: Colors.white,
+    fontWeight: '800',
+    marginBottom: 4,
+  },
+  heroEarningsValue: {
+    fontSize: 40,
+    color: Colors.white,
+    fontWeight: '900',
+    letterSpacing: -1,
+    fontVariant: ['tabular-nums'],
+  },
+  heroEarningsHint: {
+    fontSize: FontSize.xs,
+    color: 'rgba(255,255,255,0.85)',
+    marginTop: 4,
+    fontWeight: '600',
+  },
+  heroRating: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: 'rgba(255,255,255,0.22)',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: BorderRadius.full,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.3)',
+  },
+  heroRatingText: {
+    color: Colors.white,
+    fontWeight: '900',
+    fontSize: FontSize.md,
   },
   gpsCard: {
     flexDirection: 'row',
@@ -348,10 +461,17 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: Colors.border,
     marginBottom: Spacing.md,
+    shadowColor: Colors.shadow,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 12,
+    elevation: 2,
   },
   gpsCardOnline: {
-    borderColor: Colors.primarySoft,
-    backgroundColor: Colors.primaryFaint,
+    borderColor: Colors.mint,
+    backgroundColor: '#ECFDF5',
+    shadowColor: Colors.mint,
+    shadowOpacity: 0.25,
   },
   gpsInfo: {
     flexDirection: 'row',
@@ -370,7 +490,7 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
   },
   gpsTitleOnline: {
-    color: Colors.primary,
+    color: '#047857',
   },
   gpsSubtitle: {
     fontSize: FontSize.xs,
@@ -378,7 +498,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   gpsSubtitleOnline: {
-    color: Colors.primaryMedium,
+    color: '#059669',
   },
   coordsRow: {
     flexDirection: 'row',
@@ -402,24 +522,33 @@ const styles = StyleSheet.create({
     width: '48%',
     backgroundColor: Colors.card,
     padding: Spacing.md,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.lg,
     shadowColor: Colors.shadow,
-    shadowOffset: { width: 0, height: 1 },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 1,
-    shadowRadius: 4,
+    shadowRadius: 8,
     elevation: 2,
     flexGrow: 1,
     flexBasis: '47%',
+    gap: 2,
+  },
+  statCardAccent: {
+    borderTopWidth: 3,
+    borderTopColor: Colors.electric,
   },
   statValue: {
-    fontSize: FontSize.xl,
-    fontWeight: '800',
+    fontSize: FontSize.xxl - 2,
+    fontWeight: '900',
     color: Colors.textPrimary,
+    letterSpacing: -0.3,
+    marginTop: 4,
   },
   statLabel: {
     fontSize: FontSize.xs,
     color: Colors.textMuted,
     marginTop: 2,
+    fontWeight: '700',
+    letterSpacing: 0.5,
   },
   ratingRow: {
     flexDirection: 'row',

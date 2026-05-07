@@ -7,7 +7,7 @@ export default function CustomerLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: Colors.primary,
+        tabBarActiveTintColor: Colors.electricDeep,
         tabBarInactiveTintColor: Colors.textMuted,
         tabBarStyle: {
           backgroundColor: Colors.white,
@@ -15,10 +15,17 @@ export default function CustomerLayout() {
           height: 88,
           paddingTop: 8,
           paddingBottom: 28,
+          // soft top shadow for floating feel
+          shadowColor: Colors.shadowDark,
+          shadowOffset: { width: 0, height: -4 },
+          shadowOpacity: 0.08,
+          shadowRadius: 12,
+          elevation: 12,
         },
         tabBarLabelStyle: {
           fontSize: FontSize.xs,
-          fontWeight: '600',
+          fontWeight: '700',
+          letterSpacing: 0.3,
         },
       }}
     >

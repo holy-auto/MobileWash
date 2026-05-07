@@ -14,14 +14,22 @@ import {
 } from 'react-native';
 import MapView, { Marker, Circle } from 'react-native-maps';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { Colors, Spacing, FontSize, BorderRadius } from '@/constants/colors';
+import { Colors, Gradients, Spacing, FontSize, BorderRadius } from '@/constants/colors';
 import { SERVICE_CATEGORIES } from '@/constants/categories';
 import { MATCHING } from '@/constants/business-rules';
 import { useAuth } from '../_layout';
 import { preloadInterstitial } from '@/lib/admob';
 import AdBanner from '@/components/AdBanner';
 import AdMobBanner from '@/components/AdMobBanner';
+import {
+  FadeInView,
+  GradientButton,
+  PulsingDot,
+  SectionHeader,
+  AnimatedNumber,
+} from '@/components/excitement';
 import {
   getCurrentLocation,
   DEFAULT_LOCATION,
@@ -214,21 +222,40 @@ export default function CustomerHome() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {/* Header */}
-        <View style={styles.header}>
-          <View>
-            <Text style={styles.greeting}>こんにちは</Text>
-            <Text style={styles.userName}>{userName} さん</Text>
-          </View>
-          <TouchableOpacity style={styles.notificationButton}>
-            <Ionicons
-              name="notifications-outline"
-              size={24}
-              color={Colors.textPrimary}
-            />
-            <View style={styles.notificationBadge} />
-          </TouchableOpacity>
-        </View>
+        {/* Hero header — gradient band with greeting + decorative orbs */}
+        <LinearGradient
+          colors={Gradients.heroNavy as unknown as readonly [string, string, ...string[]]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.heroBand}
+        >
+          {/* Decorative orbs */}
+          <View style={styles.orbA} pointerEvents="none" />
+          <View style={styles.orbB} pointerEvents="none" />
+          <View style={styles.orbC} pointerEvents="none" />
+
+          <FadeInView style={styles.header}>
+            <View>
+              <Text style={styles.greeting}>こんにちは ✨</Text>
+              <Text style={styles.userName}>{userName} さん</Text>
+              <View style={styles.heroOnlineRow}>
+                <PulsingDot color={Colors.electric} size={8} />
+                <Text style={styles.heroOnlineText}>
+                  <AnimatedNumber value={pros.length} />
+                  名のプロが今オンライン
+                </Text>
+              </View>
+            </View>
+            <TouchableOpacity style={styles.notificationButton}>
+              <Ionicons
+                name="notifications-outline"
+                size={24}
+                color={Colors.white}
+              />
+              <View style={styles.notificationBadge} />
+            </TouchableOpacity>
+          </FadeInView>
+        </LinearGradient>
 
         {/* Map */}
         <View style={styles.mapContainer}>
@@ -313,7 +340,7 @@ export default function CustomerHome() {
 
           {/* Online count badge */}
           <View style={styles.onlineCountBadge}>
-            <View style={styles.onlinePulse} />
+            <PulsingDot color={Colors.success} size={8} />
             <Text style={styles.onlineCountText}>
               {pros.length}名のプロがオンライン
             </Text>
@@ -321,8 +348,8 @@ export default function CustomerHome() {
         </View>
 
         {/* Categories */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>サービスを選ぶ</Text>
+        <FadeInView delay={120} style={styles.section}>
+          <SectionHeader title="サービスを選ぶ" eyebrow="WHAT'S TODAY?" variant="skyPop" />
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -360,27 +387,32 @@ export default function CustomerHome() {
               </TouchableOpacity>
             ))}
           </ScrollView>
-        </View>
+        </FadeInView>
 
         {/* パートナー広告 — ホーム上部 */}
         <AdBanner placement="home_top" />
 
         {/* Nearby Pros */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>近くのプロ</Text>
-            <TouchableOpacity>
-              <Text style={styles.seeAll}>すべて見る</Text>
-            </TouchableOpacity>
-          </View>
+        <FadeInView delay={200} style={styles.section}>
+          <SectionHeader
+            title="近くのプロ"
+            eyebrow="NEARBY PROS"
+            variant="aurora"
+            trailing={
+              <TouchableOpacity>
+                <Text style={styles.seeAll}>すべて見る ›</Text>
+              </TouchableOpacity>
+            }
+          />
 
-          {pros.map((pro) => (
+          {pros.map((pro, idx) => (
+            <FadeInView key={pro.id} delay={220 + idx * 80}>
             <TouchableOpacity
-              key={pro.id}
               style={[
                 styles.proCard,
                 selectedProId === pro.id && styles.proCardSelected,
               ]}
+              activeOpacity={0.85}
               onPress={() => {
                 setSelectedProId(pro.id);
                 if (pro.latitude !== undefined && pro.longitude !== undefined) {
@@ -451,13 +483,19 @@ export default function CustomerHome() {
                   <Text style={styles.proDistance}>{pro.distance.toFixed(1)}km</Text>
                 </View>
               </View>
-              <View style={styles.proEta}>
+              <LinearGradient
+                colors={Gradients.brandCta as unknown as readonly [string, string, ...string[]]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.proEta}
+              >
                 <Text style={styles.proEtaTime}>{pro.eta}</Text>
                 <Text style={styles.proEtaLabel}>到着</Text>
-              </View>
+              </LinearGradient>
             </TouchableOpacity>
+            </FadeInView>
           ))}
-        </View>
+        </FadeInView>
       </ScrollView>
 
       {/* AdMob バナー広告 */}
@@ -474,22 +512,22 @@ export default function CustomerHome() {
           <Text style={styles.sideButtonText}>日時予約</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.mainButton}
-          activeOpacity={0.85}
+        <GradientButton
+          label="プロを呼ぶ"
+          icon="car-sport"
+          variant="brandCta"
+          size="lg"
           onPress={handleCallPro}
-        >
-          <Ionicons name="car-sport" size={24} color={Colors.white} />
-          <Text style={styles.mainButtonText}>プロを呼ぶ</Text>
-        </TouchableOpacity>
+          style={styles.mainButtonWrap}
+        />
 
         <TouchableOpacity
           style={styles.sideButton}
           activeOpacity={0.85}
           onPress={handleSubscription}
         >
-          <Ionicons name="repeat-outline" size={18} color={Colors.success} />
-          <Text style={[styles.sideButtonText, { color: Colors.success }]}>定期コース</Text>
+          <Ionicons name="repeat-outline" size={18} color={Colors.mint} />
+          <Text style={[styles.sideButtonText, { color: Colors.mint }]}>定期コース</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -504,26 +542,87 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingBottom: 100,
   },
+  // Hero band (gradient)
+  heroBand: {
+    paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing.md,
+    paddingBottom: Spacing.lg + 6,
+    borderBottomLeftRadius: 28,
+    borderBottomRightRadius: 28,
+    overflow: 'hidden',
+  },
+  orbA: {
+    position: 'absolute',
+    top: -60,
+    right: -40,
+    width: 180,
+    height: 180,
+    borderRadius: 90,
+    backgroundColor: 'rgba(0,212,255,0.16)',
+  },
+  orbB: {
+    position: 'absolute',
+    bottom: -50,
+    left: -30,
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    backgroundColor: 'rgba(139,92,246,0.18)',
+  },
+  orbC: {
+    position: 'absolute',
+    top: 30,
+    left: '40%',
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: 'rgba(236,72,153,0.10)',
+  },
+
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.md,
-    paddingBottom: Spacing.sm,
   },
   greeting: {
     fontSize: FontSize.sm,
-    color: Colors.textSecondary,
+    color: 'rgba(255,255,255,0.85)',
+    fontWeight: '600',
+    letterSpacing: 0.5,
   },
   userName: {
-    fontSize: FontSize.xl,
+    fontSize: FontSize.xxl,
+    fontWeight: '800',
+    color: Colors.white,
+    letterSpacing: -0.3,
+    marginTop: 2,
+  },
+  heroOnlineRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 10,
+    backgroundColor: 'rgba(255,255,255,0.10)',
+    alignSelf: 'flex-start',
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: BorderRadius.full,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.15)',
+  },
+  heroOnlineText: {
+    fontSize: FontSize.xs,
     fontWeight: '700',
-    color: Colors.textPrimary,
+    color: Colors.white,
+    letterSpacing: 0.3,
   },
   notificationButton: {
     position: 'relative',
     padding: Spacing.sm,
+    backgroundColor: 'rgba(255,255,255,0.12)',
+    borderRadius: BorderRadius.full,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.18)',
   },
   notificationBadge: {
     position: 'absolute',
@@ -532,7 +631,7 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: Colors.error,
+    backgroundColor: Colors.hotPink,
   },
 
   // Map
@@ -788,19 +887,26 @@ const styles = StyleSheet.create({
   },
   proEta: {
     alignItems: 'center',
-    backgroundColor: Colors.primaryFaint,
     paddingVertical: Spacing.sm,
     paddingHorizontal: Spacing.md,
-    borderRadius: BorderRadius.sm,
+    borderRadius: BorderRadius.md,
+    overflow: 'hidden',
+    shadowColor: Colors.electricDeep,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 8,
+    elevation: 4,
   },
   proEtaTime: {
     fontSize: FontSize.lg,
-    fontWeight: '800',
-    color: Colors.primary,
+    fontWeight: '900',
+    color: Colors.white,
+    letterSpacing: 0.3,
   },
   proEtaLabel: {
     fontSize: FontSize.xs,
-    color: Colors.primaryMedium,
+    color: 'rgba(255,255,255,0.92)',
+    fontWeight: '700',
   },
 
   // Bottom action bar
@@ -836,26 +942,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: Colors.primary,
   },
-  mainButton: {
+  mainButtonWrap: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: Colors.primary,
-    paddingVertical: 18,
-    paddingHorizontal: 20,
-    borderRadius: BorderRadius.full,
-    gap: Spacing.sm,
-    shadowColor: Colors.primary,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.4,
-    shadowRadius: 12,
-    elevation: 8,
-  },
-  mainButtonText: {
-    fontSize: FontSize.lg,
-    fontWeight: '800',
-    color: Colors.white,
-    letterSpacing: 0.5,
   },
 });
