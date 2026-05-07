@@ -15,7 +15,7 @@ const benefits = [
   },
   {
     title: "認定研修・保険補償あり",
-    description: "未経験でも研修プログラムで安心。施工中の保険補償も完備しています。",
+    description: "対面 2 日間の認定講習＋修了テストで未経験でも安心。施工中は対人・対物 各¥1 億の団体保険でカバーします。",
   },
 ];
 
@@ -79,7 +79,7 @@ export default function ProRecruit() {
                   <span className="text-base text-white/60 ml-2">/ 月</span>
                 </p>
                 <p className="text-[11px] text-white/60 mt-2 mb-4">
-                  ※ 週4日 / 1日3件 / 単価¥12,000 / 還元率90% の場合の試算例
+                  ※ 週4日 / 1日3件 / プレミアム手洗い・内装・コーティングを織り交ぜた平均単価¥12,000 / 還元率90% の場合の試算例
                 </p>
                 <dl className="grid grid-cols-2 gap-2 text-[12px] pt-4 border-t border-white/15">
                   <div className="flex justify-between">
@@ -99,9 +99,15 @@ export default function ProRecruit() {
                     <dd className="font-bold text-[#00b4ff]">90%</dd>
                   </div>
                 </dl>
-                <div className="mt-4 pt-4 border-t border-white/15 flex items-center justify-between">
-                  <span className="text-[12px] text-white/60">登録金</span>
-                  <span className="text-base font-bold text-[#00b4ff]">¥0</span>
+                <div className="mt-4 pt-4 border-t border-white/15 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[12px] text-white/60">登録金</span>
+                    <span className="text-base font-bold text-[#00b4ff]">¥0</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[12px] text-white/60">認定講習費（当日電子決済）</span>
+                    <span className="text-[13px] font-bold text-white/90">¥50,000</span>
+                  </div>
                 </div>
               </div>
             </div>
