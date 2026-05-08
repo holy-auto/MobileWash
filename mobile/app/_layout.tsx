@@ -41,7 +41,13 @@ export default function RootLayout() {
   const [session, setSession] = useState<Session | null>(null);
   const [role, setRole] = useState<UserRole>(null);
   const [loading, setLoading] = useState(true);
-  const [showSplash, setShowSplash] = useState(!_splashFinished);
+  // Skip splash on the /preview design playground (web only, dev convenience)
+  const isPreviewPath =
+    typeof window !== 'undefined' &&
+    window.location.pathname.startsWith('/preview');
+  const [showSplash, setShowSplash] = useState(
+    !_splashFinished && !isPreviewPath,
+  );
   const segments = useSegments();
   const router = useRouter();
 
@@ -182,6 +188,7 @@ export default function RootLayout() {
           <Stack.Screen name="_auth" options={{ presentation: 'modal' }} />
           <Stack.Screen name="role-select" />
           <Stack.Screen name="index" />
+          <Stack.Screen name="preview" />
           <Stack.Screen name="customer" />
           <Stack.Screen name="pro" />
           <Stack.Screen name="admin" />
