@@ -1,4 +1,11 @@
-const regions = [
+type RegionStatus = "active" | "soon";
+
+const regions: {
+  name: string;
+  nameEn: string;
+  status: RegionStatus;
+  prefectures: string[];
+}[] = [
   {
     name: "首都圏",
     nameEn: "Tokyo Metro",
@@ -37,6 +44,87 @@ const regions = [
   },
 ];
 
+const ACTIVE_FILL = "#0099e6";
+const SOON_FILL = "#cfdfee";
+const STROKE = "#ffffff";
+
+const japanRegions: {
+  id: string;
+  name: string;
+  status: RegionStatus;
+  d: string;
+}[] = [
+  {
+    id: "hokkaido",
+    name: "北海道",
+    status: "soon",
+    d: "M286 48 L312 44 L338 50 L356 64 L364 86 L362 112 L350 132 L324 144 L294 142 L270 130 L258 108 L258 84 L268 62 Z",
+  },
+  {
+    id: "tohoku",
+    name: "東北",
+    status: "soon",
+    d: "M276 162 L296 166 L308 184 L314 214 L312 246 L302 268 L284 274 L270 268 L260 248 L256 218 L260 188 L268 170 Z",
+  },
+  {
+    id: "kanto",
+    name: "関東",
+    status: "active",
+    d: "M268 274 L296 278 L318 290 L324 308 L314 322 L296 330 L270 332 L250 322 L242 306 L246 290 L256 280 Z",
+  },
+  {
+    id: "chubu",
+    name: "中部",
+    status: "active",
+    d: "M188 280 L236 282 L248 296 L252 314 L242 326 L222 332 L204 330 L184 322 L172 306 L172 292 Z",
+  },
+  {
+    id: "kansai",
+    name: "関西",
+    status: "active",
+    d: "M150 298 L180 296 L196 304 L202 318 L192 330 L172 334 L152 330 L140 318 L140 308 Z",
+  },
+  {
+    id: "chugoku",
+    name: "中国",
+    status: "soon",
+    d: "M70 304 L142 308 L148 318 L140 328 L86 332 L62 326 L56 316 L60 308 Z",
+  },
+  {
+    id: "shikoku",
+    name: "四国",
+    status: "soon",
+    d: "M112 350 L162 350 L176 360 L168 372 L130 374 L108 366 L102 358 Z",
+  },
+  {
+    id: "kyushu",
+    name: "九州",
+    status: "soon",
+    d: "M36 320 L78 322 L94 342 L98 368 L86 388 L66 394 L42 386 L24 366 L20 344 L26 328 Z",
+  },
+  {
+    id: "okinawa",
+    name: "沖縄",
+    status: "soon",
+    d: "M8 434 L32 434 L40 444 L24 450 L4 446 Z",
+  },
+];
+
+const cityMarkers: {
+  name: string;
+  cx: number;
+  cy: number;
+  status: RegionStatus;
+  primary?: boolean;
+}[] = [
+  { name: "東京", cx: 282, cy: 308, status: "active", primary: true },
+  { name: "名古屋", cx: 218, cy: 308, status: "active" },
+  { name: "大阪", cx: 172, cy: 318, status: "active" },
+  { name: "札幌", cx: 308, cy: 92, status: "soon" },
+  { name: "仙台", cx: 290, cy: 220, status: "soon" },
+  { name: "福岡", cx: 56, cy: 340, status: "soon" },
+];
+
 export default function Areas() {
   return (
     <section
@@ -63,25 +151,68 @@ export default function Areas() {
           <div className="lg:col-span-5">
             <div className="soft-card bg-white p-8">
               <p className="section-label mb-4 inline-flex">Coverage Map</p>
-              <div className="aspect-square max-w-[280px] mx-auto relative">
-                <svg viewBox="0 0 200 200" className="w-full h-full" aria-hidden="true">
-                  <g fill="#e4eef7" stroke="#cfdfee" strokeWidth={0.5}>
-                    <path d="M30 60 Q35 50 50 55 L65 65 L70 80 L60 90 Z" />
-                    <path d="M70 80 L85 75 L100 85 L95 100 L80 105 Z" />
-                    <path d="M100 85 L120 75 L135 85 L140 100 L125 110 L110 105 Z" />
-                    <path d="M140 100 L160 95 L170 110 L165 130 L150 135 L138 125 Z" />
-                    <path d="M150 135 L160 150 L155 165 L140 160 Z" />
+              <div className="aspect-square max-w-[320px] mx-auto relative">
+                <svg
+                  viewBox="0 0 400 480"
+                  className="w-full h-full"
+                  role="img"
+                  aria-label="日本地図 - 出張洗車サービス対応エリア"
+                >
+                  <g strokeLinejoin="round" strokeLinecap="round">
+                    {japanRegions.map((r) => (
+                      <path
+                        key={r.id}
+                        d={r.d}
+                        fill={r.status === "active" ? ACTIVE_FILL : SOON_FILL}
+                        fillOpacity={r.status === "active" ? 0.9 : 1}
+                        stroke={STROKE}
+                        strokeWidth={1.5}
+                      >
+                        <title>{r.name}</title>
+                      </path>
+                    ))}
                   </g>
+
                   <g>
-                    <circle cx="115" cy="92" r="4" fill="#0099e6" />
-                    <circle cx="115" cy="92" r="8" fill="#0099e6" opacity="0.3">
-                      <animate attributeName="r" from="4" to="14" dur="2s" repeatCount="indefinite" />
-                      <animate attributeName="opacity" from="0.6" to="0" dur="2s" repeatCount="indefinite" />
-                    </circle>
-                    <circle cx="85" cy="100" r="3" fill="#0099e6" />
-                    <circle cx="135" cy="100" r="3" fill="#0099e6" />
-                    <circle cx="155" cy="125" r="2.5" fill="#0099e6" opacity="0.5" />
-                    <circle cx="60" cy="80" r="2.5" fill="#0099e6" opacity="0.5" />
+                    {cityMarkers.map((c) => (
+                      <g key={c.name}>
+                        {c.primary && (
+                          <circle
+                            cx={c.cx}
+                            cy={c.cy}
+                            r={8}
+                            fill={ACTIVE_FILL}
+                            opacity={0.35}
+                          >
+                            <animate
+                              attributeName="r"
+                              from="8"
+                              to="22"
+                              dur="2s"
+                              repeatCount="indefinite"
+                            />
+                            <animate
+                              attributeName="opacity"
+                              from="0.6"
+                              to="0"
+                              dur="2s"
+                              repeatCount="indefinite"
+                            />
+                          </circle>
+                        )}
+                        <circle
+                          cx={c.cx}
+                          cy={c.cy}
+                          r={c.primary ? 6 : 4.5}
+                          fill={c.status === "active" ? ACTIVE_FILL : "#ffffff"}
+                          stroke={c.status === "active" ? "#ffffff" : ACTIVE_FILL}
+                          strokeWidth={c.status === "active" ? 2 : 1.5}
+                          opacity={c.status === "active" ? 1 : 0.85}
+                        >
+                          <title>{c.name}</title>
+                        </circle>
+                      </g>
+                    ))}
                   </g>
                 </svg>
               </div>
