@@ -134,7 +134,7 @@ export default function CustomerHome() {
           Alert.alert(
             '位置情報の使用',
             '近くのプロを表示するために現在地を使用します。',
-            [{ text: 'OK', onPress: resolve }],
+            [{ text: 'OK', onPress: () => resolve() }],
           );
         });
       });
@@ -220,7 +220,12 @@ export default function CustomerHome() {
             <Text style={styles.greeting}>こんにちは</Text>
             <Text style={styles.userName}>{userName} さん</Text>
           </View>
-          <TouchableOpacity style={styles.notificationButton}>
+          <TouchableOpacity
+            style={styles.notificationButton}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="通知"
+          >
             <Ionicons
               name="notifications-outline"
               size={24}
@@ -307,6 +312,9 @@ export default function CustomerHome() {
           <TouchableOpacity
             style={styles.recenterButton}
             onPress={handleRecenter}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="現在地に戻す"
           >
             <Ionicons name="navigate" size={20} color={Colors.primary} />
           </TouchableOpacity>
@@ -369,11 +377,22 @@ export default function CustomerHome() {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>近くのプロ</Text>
-            <TouchableOpacity>
+            <TouchableOpacity
+              activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel="近くのプロを すべて見る"
+            >
               <Text style={styles.seeAll}>すべて見る</Text>
             </TouchableOpacity>
           </View>
 
+          {pros.length === 0 && (
+            <View style={styles.emptyPros}>
+              <Ionicons name="people-outline" size={36} color={Colors.textMuted} />
+              <Text style={styles.emptyProsText}>近くにオンラインのプロがいません</Text>
+              <Text style={styles.emptyProsSub}>時間帯を変えて再度お試しください</Text>
+            </View>
+          )}
           {pros.map((pro) => (
             <TouchableOpacity
               key={pro.id}
@@ -381,6 +400,9 @@ export default function CustomerHome() {
                 styles.proCard,
                 selectedProId === pro.id && styles.proCardSelected,
               ]}
+              activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel={`${pro.name}さんのプロフィール、距離 ${pro.distance.toFixed(1)}km、評価 ${pro.rating}`}
               onPress={() => {
                 setSelectedProId(pro.id);
                 if (pro.latitude !== undefined && pro.longitude !== undefined) {
@@ -469,6 +491,8 @@ export default function CustomerHome() {
           style={styles.sideButton}
           activeOpacity={0.85}
           onPress={handleScheduleBooking}
+          accessibilityRole="button"
+          accessibilityLabel="日時を指定して予約"
         >
           <Ionicons name="calendar-outline" size={18} color={Colors.primary} />
           <Text style={styles.sideButtonText}>日時予約</Text>
@@ -478,6 +502,8 @@ export default function CustomerHome() {
           style={styles.mainButton}
           activeOpacity={0.85}
           onPress={handleCallPro}
+          accessibilityRole="button"
+          accessibilityLabel="今すぐプロを呼ぶ"
         >
           <Ionicons name="car-sport" size={24} color={Colors.white} />
           <Text style={styles.mainButtonText}>プロを呼ぶ</Text>
@@ -487,9 +513,11 @@ export default function CustomerHome() {
           style={styles.sideButton}
           activeOpacity={0.85}
           onPress={handleSubscription}
+          accessibilityRole="button"
+          accessibilityLabel="定期コースを申し込む"
         >
           <Ionicons name="repeat-outline" size={18} color={Colors.success} />
-          <Text style={[styles.sideButtonText, { color: Colors.success }]}>定期コース</Text>
+          <Text style={[styles.sideButtonText, styles.sideButtonTextSuccess]}>定期コース</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -803,6 +831,23 @@ const styles = StyleSheet.create({
     color: Colors.primaryMedium,
   },
 
+  // Empty state
+  emptyPros: {
+    alignItems: 'center',
+    paddingVertical: Spacing.xl,
+    gap: Spacing.xs,
+  },
+  emptyProsText: {
+    fontSize: FontSize.md,
+    fontWeight: '600',
+    color: Colors.textPrimary,
+    marginTop: Spacing.sm,
+  },
+  emptyProsSub: {
+    fontSize: FontSize.sm,
+    color: Colors.textMuted,
+  },
+
   // Bottom action bar
   bottomBar: {
     position: 'absolute',
@@ -836,6 +881,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: Colors.primary,
   },
+  sideButtonTextSuccess: { color: Colors.success },
   mainButton: {
     flex: 1,
     flexDirection: 'row',

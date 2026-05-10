@@ -60,7 +60,7 @@ const ACTION_ITEMS = [
     label: '改善プラン対象',
     count: 2,
     icon: 'alert-circle' as const,
-    color: '#F59E0B',
+    color: Colors.warning,
   },
   {
     label: 'クレーム対応中',
@@ -145,8 +145,8 @@ export default function AdminDashboard() {
 
         {/* Stat Cards Row */}
         <View style={styles.statGrid}>
-          {STAT_CARDS.map((card, idx) => (
-            <View key={idx} style={styles.statCard}>
+          {STAT_CARDS.map((card) => (
+            <View key={card.label} style={styles.statCard}>
               <View style={[styles.statIconWrap, { backgroundColor: card.bg }]}>
                 <Ionicons name={card.icon} size={18} color={card.color} />
               </View>
@@ -160,8 +160,14 @@ export default function AdminDashboard() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>要対応アイテム</Text>
           <View style={styles.actionGrid}>
-            {ACTION_ITEMS.map((item, idx) => (
-              <TouchableOpacity key={idx} style={styles.actionCard}>
+            {ACTION_ITEMS.map((item) => (
+              <TouchableOpacity
+                key={item.label}
+                style={styles.actionCard}
+                activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel={`${item.label} ${item.count}件`}
+              >
                 <View style={styles.actionCardTop}>
                   <Ionicons name={item.icon} size={20} color={item.color} />
                   <View style={[styles.actionCountBadge, { backgroundColor: item.color }]}>
@@ -178,7 +184,11 @@ export default function AdminDashboard() {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>直近の注文</Text>
-            <TouchableOpacity>
+            <TouchableOpacity
+              activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel="すべての注文を見る"
+            >
               <Text style={styles.seeAll}>すべて見る</Text>
             </TouchableOpacity>
           </View>

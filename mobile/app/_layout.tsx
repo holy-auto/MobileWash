@@ -2,9 +2,11 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState, useCallback, useMemo, createContext, useContext } from 'react';
 import { StripeProvider } from '@stripe/stripe-react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import type { Session, User } from '@supabase/supabase-js';
 import { useRouter, useSegments } from 'expo-router';
+import { Colors } from '@/constants/colors';
 import SplashScreen from './splash';
 
 const STRIPE_PUBLISHABLE_KEY =
@@ -158,35 +160,37 @@ export default function RootLayout() {
 
   if (showSplash) {
     return (
-      <>
+      <SafeAreaProvider>
         <StatusBar style="light" />
         <SplashScreen onFinish={handleSplashFinish} />
-      </>
+      </SafeAreaProvider>
     );
   }
 
   return (
-    <StripeProvider
-      publishableKey={STRIPE_PUBLISHABLE_KEY}
-      merchantIdentifier="merchant.com.mobilewash.app"
-    >
-      <AuthContext.Provider value={authValue}>
-        <StatusBar style="dark" />
-        <Stack
-          screenOptions={{
-            headerShown: false,
-            contentStyle: { backgroundColor: '#FAFCFB' },
-            animation: 'slide_from_right',
-          }}
-        >
-          <Stack.Screen name="_auth" options={{ presentation: 'modal' }} />
-          <Stack.Screen name="role-select" />
-          <Stack.Screen name="index" />
-          <Stack.Screen name="customer" />
-          <Stack.Screen name="pro" />
-          <Stack.Screen name="admin" />
-        </Stack>
-      </AuthContext.Provider>
-    </StripeProvider>
+    <SafeAreaProvider>
+      <StripeProvider
+        publishableKey={STRIPE_PUBLISHABLE_KEY}
+        merchantIdentifier="merchant.com.mobilewash.app"
+      >
+        <AuthContext.Provider value={authValue}>
+          <StatusBar style="dark" />
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              contentStyle: { backgroundColor: Colors.background },
+              animation: 'slide_from_right',
+            }}
+          >
+            <Stack.Screen name="_auth" options={{ presentation: 'modal' }} />
+            <Stack.Screen name="role-select" />
+            <Stack.Screen name="index" />
+            <Stack.Screen name="customer" />
+            <Stack.Screen name="pro" />
+            <Stack.Screen name="admin" />
+          </Stack>
+        </AuthContext.Provider>
+      </StripeProvider>
+    </SafeAreaProvider>
   );
 }

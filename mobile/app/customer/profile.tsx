@@ -80,7 +80,11 @@ export default function ProfileScreen() {
             <Text style={styles.profileName}>{userName}</Text>
             <Text style={styles.profileEmail}>{email}</Text>
           </View>
-          <TouchableOpacity>
+          <TouchableOpacity
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="プロフィールを編集"
+          >
             <Ionicons name="chevron-forward" size={22} color={Colors.textMuted} />
           </TouchableOpacity>
         </View>
@@ -106,7 +110,12 @@ export default function ProfileScreen() {
               <Text style={styles.pointsValue}>{MOCK_LOYALTY.totalPoints.toLocaleString()}</Text>
               <Text style={styles.pointsUnit}>pt</Text>
             </View>
-            <TouchableOpacity style={styles.pointsUseButton}>
+            <TouchableOpacity
+              style={styles.pointsUseButton}
+              activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel="ポイントを使う"
+            >
               <Text style={styles.pointsUseText}>ポイントを使う</Text>
             </TouchableOpacity>
           </View>
@@ -141,6 +150,9 @@ export default function ProfileScreen() {
               </View>
             </View>
           </View>
+          {MOCK_COUPONS.length === 0 ? (
+            <Text style={styles.emptyCoupons}>利用可能なクーポンはありません</Text>
+          ) : null}
           {MOCK_COUPONS.map((coupon) => (
             <View key={coupon.id} style={styles.couponItem}>
               <View style={styles.couponLeft}>
@@ -158,28 +170,37 @@ export default function ProfileScreen() {
         <View style={styles.quickActions}>
           <TouchableOpacity
             style={styles.quickAction}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="ギフトを贈る"
             onPress={() => router.push('/customer/gift' as any)}
           >
-            <View style={[styles.quickActionIcon, { backgroundColor: '#FEF3C7' }]}>
-              <Ionicons name="gift-outline" size={24} color="#F59E0B" />
+            <View style={[styles.quickActionIcon, styles.quickActionIconWarning]}>
+              <Ionicons name="gift-outline" size={24} color={Colors.warning} />
             </View>
             <Text style={styles.quickActionLabel}>ギフトを贈る</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.quickAction}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="定期コース"
             onPress={() => router.push('/customer/subscription' as any)}
           >
-            <View style={[styles.quickActionIcon, { backgroundColor: '#DCFCE7' }]}>
-              <Ionicons name="repeat-outline" size={24} color="#22C55E" />
+            <View style={[styles.quickActionIcon, styles.quickActionIconSuccess]}>
+              <Ionicons name="repeat-outline" size={24} color={Colors.success} />
             </View>
             <Text style={styles.quickActionLabel}>定期コース</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.quickAction}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="日時予約"
             onPress={() => router.push('/customer/booking/schedule' as any)}
           >
-            <View style={[styles.quickActionIcon, { backgroundColor: '#EDE9FE' }]}>
-              <Ionicons name="calendar-outline" size={24} color="#8B5CF6" />
+            <View style={[styles.quickActionIcon, styles.quickActionIconAccent]}>
+              <Ionicons name="calendar-outline" size={24} color={Colors.primaryLight} />
             </View>
             <Text style={styles.quickActionLabel}>日時予約</Text>
           </TouchableOpacity>
@@ -205,8 +226,14 @@ export default function ProfileScreen() {
 
         {/* Menu */}
         <View style={styles.menu}>
-          {MENU_ITEMS.map((item, idx) => (
-            <TouchableOpacity key={idx} style={styles.menuItem}>
+          {MENU_ITEMS.map((item) => (
+            <TouchableOpacity
+              key={item.label}
+              style={styles.menuItem}
+              activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel={item.label}
+            >
               <Ionicons
                 name={item.icon as any}
                 size={22}
@@ -219,13 +246,19 @@ export default function ProfileScreen() {
         </View>
 
         {/* Login / Logout */}
-        <TouchableOpacity style={styles.logoutButton} onPress={handleSignOut}>
+        <TouchableOpacity
+          style={styles.logoutButton}
+          onPress={handleSignOut}
+          activeOpacity={0.7}
+          accessibilityRole="button"
+          accessibilityLabel={isGuest ? 'ログイン または 会員登録' : 'ログアウト'}
+        >
           <Ionicons
             name={isGuest ? 'log-in-outline' : 'log-out-outline'}
             size={22}
             color={isGuest ? Colors.primary : Colors.error}
           />
-          <Text style={[styles.logoutText, isGuest && { color: Colors.primary }]}>
+          <Text style={[styles.logoutText, isGuest && styles.logoutTextGuest]}>
             {isGuest ? 'ログイン / 会員登録' : 'ログアウト'}
           </Text>
         </TouchableOpacity>
@@ -428,6 +461,11 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: Colors.borderLight,
   },
+  emptyCoupons: {
+    fontSize: FontSize.sm,
+    color: Colors.textMuted,
+    paddingVertical: Spacing.sm,
+  },
   couponLeft: {
     flex: 1,
   },
@@ -480,6 +518,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: Spacing.sm,
   },
+  quickActionIconWarning: { backgroundColor: '#FEF3C7' },
+  quickActionIconSuccess: { backgroundColor: '#DCFCE7' },
+  quickActionIconAccent: { backgroundColor: Colors.primaryFaint },
   quickActionLabel: {
     fontSize: FontSize.xs,
     fontWeight: '600',
@@ -551,6 +592,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: Colors.error,
   },
+  logoutTextGuest: { color: Colors.primary },
   version: {
     textAlign: 'center',
     fontSize: FontSize.xs,

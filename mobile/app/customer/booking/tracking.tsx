@@ -116,7 +116,9 @@ export default function TrackingScreen() {
         800
       );
     });
-    return () => sub.unsubscribe();
+    return () => {
+      void sub.unsubscribe();
+    };
   }, [params.proId]);
 
   // Simulate pro movement (demo fallback when no real proId)
@@ -438,6 +440,9 @@ export default function TrackingScreen() {
             <TouchableOpacity
               style={styles.completeBtn}
               onPress={handleConfirmComplete}
+              activeOpacity={0.85}
+              accessibilityRole="button"
+              accessibilityLabel="作業完了を確認"
             >
               <Ionicons
                 name="checkmark-circle"
@@ -477,7 +482,13 @@ export default function TrackingScreen() {
 
         {/* Cancel Button */}
         {currentStatus !== 'pro_marked_done' && (
-          <TouchableOpacity style={styles.cancelBtn} onPress={handleCancel}>
+          <TouchableOpacity
+            style={styles.cancelBtn}
+            onPress={handleCancel}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="予約をキャンセル"
+          >
             <Text style={styles.cancelBtnText}>キャンセル</Text>
           </TouchableOpacity>
         )}

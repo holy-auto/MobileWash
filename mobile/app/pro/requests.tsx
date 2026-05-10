@@ -7,6 +7,7 @@ import {
   SafeAreaView,
   ScrollView,
   Alert,
+  RefreshControl,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, FontSize, BorderRadius } from '@/constants/colors';
@@ -122,6 +123,13 @@ const countdownStyles = StyleSheet.create({
 
 export default function RequestsScreen() {
   const [requests, setRequests] = useState(MOCK_REQUESTS);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await new Promise((resolve) => setTimeout(resolve, 600));
+    setRefreshing(false);
+  }, []);
 
   const handleAccept = (id: string) => {
     setRequests((prev) =>
@@ -172,7 +180,17 @@ export default function RequestsScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor={Colors.primary}
+            colors={[Colors.primary]}
+          />
+        }
+      >
         <Text style={styles.title}>依頼管理</Text>
 
         {/* New Requests with countdown */}
@@ -222,10 +240,22 @@ export default function RequestsScreen() {
                 </View>
 
                 <View style={styles.actionRow}>
-                  <TouchableOpacity style={styles.declineButton} onPress={() => handleDecline(req.id)}>
+                  <TouchableOpacity
+                    style={styles.declineButton}
+                    onPress={() => handleDecline(req.id)}
+                    activeOpacity={0.7}
+                    accessibilityRole="button"
+                    accessibilityLabel={`${req.customer}さんの依頼を辞退`}
+                  >
                     <Text style={styles.declineButtonText}>辞退</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity style={styles.acceptButton} onPress={() => handleAccept(req.id)}>
+                  <TouchableOpacity
+                    style={styles.acceptButton}
+                    onPress={() => handleAccept(req.id)}
+                    activeOpacity={0.85}
+                    accessibilityRole="button"
+                    accessibilityLabel={`${req.customer}さんの依頼を承認`}
+                  >
                     <Ionicons name="checkmark" size={20} color={Colors.white} />
                     <Text style={styles.acceptButtonText}>承認する</Text>
                   </TouchableOpacity>
@@ -259,7 +289,13 @@ export default function RequestsScreen() {
 
                   {/* Action buttons based on status */}
                   {req.status === 'accepted' && (
-                    <TouchableOpacity style={styles.actionBtn} onPress={() => handleStartWork(req.id)}>
+                    <TouchableOpacity
+                      style={styles.actionBtn}
+                      onPress={() => handleStartWork(req.id)}
+                      activeOpacity={0.85}
+                      accessibilityRole="button"
+                      accessibilityLabel="作業を開始する"
+                    >
                       <Ionicons name="play" size={18} color={Colors.white} />
                       <Text style={styles.actionBtnText}>作業開始</Text>
                     </TouchableOpacity>
@@ -267,8 +303,11 @@ export default function RequestsScreen() {
 
                   {req.status === 'in_progress' && (
                     <TouchableOpacity
-                      style={[styles.actionBtn, { backgroundColor: Colors.success }]}
+                      style={[styles.actionBtn, styles.actionBtnSuccess]}
                       onPress={() => handleMarkDone(req.id)}
+                      activeOpacity={0.85}
+                      accessibilityRole="button"
+                      accessibilityLabel="作業完了を報告"
                     >
                       <Ionicons name="checkmark-circle" size={18} color={Colors.white} />
                       <Text style={styles.actionBtnText}>作業完了報告</Text>
@@ -363,6 +402,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary, paddingVertical: 12,
     borderRadius: BorderRadius.md, marginTop: Spacing.md, gap: Spacing.sm,
   },
+  actionBtnSuccess: { backgroundColor: Colors.success },
   actionBtnText: { fontSize: FontSize.md, fontWeight: '700', color: Colors.white },
   waitingCard: {
     flexDirection: 'row', alignItems: 'center', gap: Spacing.sm,

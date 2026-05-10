@@ -24,8 +24,8 @@ export default function MatchingScreen() {
   }>();
 
   const [status, setStatus] = useState<'searching' | 'expanded' | 'accepted' | 'no_match'>('searching');
-  const [countdown, setCountdown] = useState(MATCHING.ACCEPTANCE_TIMEOUT_SEC);
-  const [radius, setRadius] = useState(MATCHING.BASE_RADIUS_KM);
+  const [countdown, setCountdown] = useState<number>(MATCHING.ACCEPTANCE_TIMEOUT_SEC);
+  const [radius, setRadius] = useState<number>(MATCHING.BASE_RADIUS_KM);
   const pulseAnim = useRef(new Animated.Value(1)).current;
 
   // Pulse animation
@@ -154,6 +154,9 @@ export default function MatchingScreen() {
             <TouchableOpacity
               style={styles.retryButton}
               onPress={() => router.dismissAll()}
+              activeOpacity={0.85}
+              accessibilityRole="button"
+              accessibilityLabel="ホームに戻る"
             >
               <Text style={styles.retryButtonText}>ホームに戻る</Text>
             </TouchableOpacity>
@@ -212,7 +215,13 @@ export default function MatchingScreen() {
             </View>
 
             {/* Cancel */}
-            <TouchableOpacity style={styles.cancelButton} onPress={handleCancel}>
+            <TouchableOpacity
+              style={styles.cancelButton}
+              onPress={handleCancel}
+              activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel="マッチングをキャンセル"
+            >
               <Text style={styles.cancelText}>キャンセル（無料）</Text>
             </TouchableOpacity>
           </>

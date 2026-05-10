@@ -8,6 +8,9 @@ import {
   ScrollView,
   TextInput,
   Alert,
+  KeyboardAvoidingView,
+  Platform,
+  Keyboard,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -27,6 +30,7 @@ export default function GiftScreen() {
 
   const handleSend = () => {
     if (!canSend) return;
+    Keyboard.dismiss();
     Alert.alert(
       'ギフトを送信',
       `${recipientName}さんに¥${selectedAmount!.toLocaleString()}分のギフトを送りますか？`,
@@ -46,119 +50,155 @@ export default function GiftScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={24} color={Colors.textPrimary} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>ギフトを贈る</Text>
-        <View style={{ width: 32 }} />
-      </View>
-
-      <ScrollView contentContainerStyle={styles.content}>
-        {/* Hero */}
-        <View style={styles.hero}>
-          <View style={styles.heroIcon}>
-            <Ionicons name="gift" size={40} color="#F59E0B" />
-          </View>
-          <Text style={styles.heroTitle}>洗車ギフト</Text>
-          <Text style={styles.heroSub}>
-            大切な方にプロの洗車をプレゼント{'\n'}
-            有効期限: {GIFT.EXPIRY_DAYS}日間
-          </Text>
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        {/* Header */}
+        <View style={styles.header}>
+          <TouchableOpacity
+            onPress={() => router.back()}
+            style={styles.backBtn}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="戻る"
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
+            <Ionicons name="arrow-back" size={24} color={Colors.textPrimary} />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>ギフトを贈る</Text>
+          <View style={styles.headerSpacer} />
         </View>
 
-        {/* Recipient */}
-        <View style={styles.section}>
-          <Text style={styles.sectionLabel}>贈り先</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="お名前"
-            value={recipientName}
-            onChangeText={setRecipientName}
-            placeholderTextColor={Colors.textMuted}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="メールアドレス"
-            value={recipientEmail}
-            onChangeText={setRecipientEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            placeholderTextColor={Colors.textMuted}
-          />
-        </View>
-
-        {/* Amount */}
-        <View style={styles.section}>
-          <Text style={styles.sectionLabel}>金額を選択</Text>
-          <View style={styles.amountGrid}>
-            {GIFT_AMOUNTS.map((amount) => (
-              <TouchableOpacity
-                key={amount}
-                style={[
-                  styles.amountCard,
-                  selectedAmount === amount && styles.amountCardSelected,
-                ]}
-                onPress={() => setSelectedAmount(amount)}
-              >
-                <Text
-                  style={[
-                    styles.amountText,
-                    selectedAmount === amount && styles.amountTextSelected,
-                  ]}
-                >
-                  ¥{amount.toLocaleString()}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-
-        {/* Message */}
-        <View style={styles.section}>
-          <Text style={styles.sectionLabel}>
-            メッセージ（任意・{GIFT.MESSAGE_MAX_LENGTH}文字以内）
-          </Text>
-          <TextInput
-            style={styles.messageInput}
-            placeholder="いつもありがとう！ピカピカの車を楽しんでね"
-            value={message}
-            onChangeText={(t) => setMessage(t.slice(0, GIFT.MESSAGE_MAX_LENGTH))}
-            multiline
-            numberOfLines={4}
-            textAlignVertical="top"
-            placeholderTextColor={Colors.textMuted}
-          />
-          <Text style={styles.charCount}>
-            {message.length}/{GIFT.MESSAGE_MAX_LENGTH}
-          </Text>
-        </View>
-      </ScrollView>
-
-      {/* Bottom CTA */}
-      <View style={styles.bottomBar}>
-        {selectedAmount && (
-          <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>合計金額</Text>
-            <Text style={styles.summaryValue}>¥{selectedAmount.toLocaleString()}</Text>
-          </View>
-        )}
-        <TouchableOpacity
-          style={[styles.sendButton, !canSend && styles.sendButtonDisabled]}
-          onPress={handleSend}
-          disabled={!canSend}
+        <ScrollView
+          contentContainerStyle={styles.content}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
         >
-          <Ionicons name="gift" size={20} color={Colors.white} />
-          <Text style={styles.sendButtonText}>ギフトを購入・送信</Text>
-        </TouchableOpacity>
-      </View>
+          {/* Hero */}
+          <View style={styles.hero}>
+            <View style={styles.heroIcon}>
+              <Ionicons name="gift" size={40} color={Colors.warning} />
+            </View>
+            <Text style={styles.heroTitle}>洗車ギフト</Text>
+            <Text style={styles.heroSub}>
+              大切な方にプロの洗車をプレゼント{'\n'}
+              有効期限: {GIFT.EXPIRY_DAYS}日間
+            </Text>
+          </View>
+
+          {/* Recipient */}
+          <View style={styles.section}>
+            <Text style={styles.sectionLabel}>贈り先</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="お名前"
+              value={recipientName}
+              onChangeText={setRecipientName}
+              placeholderTextColor={Colors.textMuted}
+              returnKeyType="next"
+              autoCapitalize="words"
+              autoCorrect={false}
+              maxLength={50}
+              textContentType="name"
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="メールアドレス"
+              value={recipientEmail}
+              onChangeText={setRecipientEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoCorrect={false}
+              autoComplete="email"
+              textContentType="emailAddress"
+              returnKeyType="done"
+              maxLength={120}
+              placeholderTextColor={Colors.textMuted}
+            />
+          </View>
+
+          {/* Amount */}
+          <View style={styles.section}>
+            <Text style={styles.sectionLabel}>金額を選択</Text>
+            <View style={styles.amountGrid}>
+              {GIFT_AMOUNTS.map((amount) => (
+                <TouchableOpacity
+                  key={amount}
+                  style={[
+                    styles.amountCard,
+                    selectedAmount === amount && styles.amountCardSelected,
+                  ]}
+                  onPress={() => setSelectedAmount(amount)}
+                  activeOpacity={0.7}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: selectedAmount === amount }}
+                  accessibilityLabel={`${amount.toLocaleString()}円のギフト`}
+                >
+                  <Text
+                    style={[
+                      styles.amountText,
+                      selectedAmount === amount && styles.amountTextSelected,
+                    ]}
+                  >
+                    ¥{amount.toLocaleString()}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+
+          {/* Message */}
+          <View style={styles.section}>
+            <Text style={styles.sectionLabel}>
+              メッセージ（任意・{GIFT.MESSAGE_MAX_LENGTH}文字以内）
+            </Text>
+            <TextInput
+              style={styles.messageInput}
+              placeholder="いつもありがとう！ピカピカの車を楽しんでね"
+              value={message}
+              onChangeText={(t) => setMessage(t.slice(0, GIFT.MESSAGE_MAX_LENGTH))}
+              multiline
+              numberOfLines={4}
+              maxLength={GIFT.MESSAGE_MAX_LENGTH}
+              textAlignVertical="top"
+              placeholderTextColor={Colors.textMuted}
+            />
+            <Text style={styles.charCount}>
+              {message.length}/{GIFT.MESSAGE_MAX_LENGTH}
+            </Text>
+          </View>
+        </ScrollView>
+
+        {/* Bottom CTA */}
+        <View style={styles.bottomBar}>
+          {selectedAmount && (
+            <View style={styles.summaryRow}>
+              <Text style={styles.summaryLabel}>合計金額</Text>
+              <Text style={styles.summaryValue}>¥{selectedAmount.toLocaleString()}</Text>
+            </View>
+          )}
+          <TouchableOpacity
+            style={[styles.sendButton, !canSend && styles.sendButtonDisabled]}
+            onPress={handleSend}
+            disabled={!canSend}
+            activeOpacity={0.85}
+            accessibilityRole="button"
+            accessibilityLabel="ギフトを購入して送信"
+            accessibilityState={{ disabled: !canSend }}
+          >
+            <Ionicons name="gift" size={20} color={Colors.white} />
+            <Text style={styles.sendButtonText}>ギフトを購入・送信</Text>
+          </TouchableOpacity>
+        </View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
+  flex: { flex: 1 },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -168,6 +208,7 @@ const styles = StyleSheet.create({
   },
   backBtn: { padding: Spacing.xs },
   headerTitle: { fontSize: FontSize.xl, fontWeight: '700', color: Colors.textPrimary },
+  headerSpacer: { width: 32 },
   content: { padding: Spacing.lg, paddingBottom: 180 },
 
   // Hero
@@ -249,7 +290,7 @@ const styles = StyleSheet.create({
   summaryValue: { fontSize: FontSize.xl, fontWeight: '800', color: Colors.textPrimary },
   sendButton: {
     flexDirection: 'row', justifyContent: 'center', alignItems: 'center',
-    backgroundColor: '#F59E0B',
+    backgroundColor: Colors.warning,
     paddingVertical: 16, borderRadius: BorderRadius.md, gap: Spacing.sm,
   },
   sendButtonDisabled: { opacity: 0.4 },

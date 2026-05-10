@@ -63,11 +63,18 @@ export default function SubscriptionScreen() {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          style={styles.backBtn}
+          activeOpacity={0.7}
+          accessibilityRole="button"
+          accessibilityLabel="戻る"
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        >
           <Ionicons name="arrow-back" size={24} color={Colors.textPrimary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>定期コース</Text>
-        <View style={{ width: 32 }} />
+        <View style={styles.headerSpacer} />
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
@@ -94,6 +101,10 @@ export default function SubscriptionScreen() {
               key={p.id}
               style={[styles.planCard, selectedPlan === p.id && styles.planCardSelected]}
               onPress={() => setSelectedPlan(p.id)}
+              activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityState={{ selected: selectedPlan === p.id }}
+              accessibilityLabel={`${p.name} プラン、${p.intervalDays}日ごと`}
             >
               <View style={styles.planHeader}>
                 <Text style={[
@@ -140,19 +151,23 @@ export default function SubscriptionScreen() {
               key={m.id}
               style={[styles.menuCard, isSelected && styles.menuCardSelected]}
               onPress={() => setSelectedMenu(m.id)}
+              activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityState={{ selected: isSelected }}
+              accessibilityLabel={`${m.name} ${newPrice.toLocaleString()}円`}
             >
               <MaterialCommunityIcons
                 name={CATEGORY_ICONS[m.categoryId] as any}
                 size={22}
                 color={isSelected ? Colors.primary : Colors.textMuted}
               />
-              <View style={{ flex: 1, marginLeft: Spacing.md }}>
+              <View style={styles.menuInfoCol}>
                 <Text style={styles.menuName}>{m.name}</Text>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 2 }}>
+                <View style={styles.menuPriceRow}>
                   {discount > 0 && (
                     <Text style={styles.menuOrigPrice}>¥{m.price.toLocaleString()}</Text>
                   )}
-                  <Text style={[styles.menuPrice, isSelected && { color: Colors.primary }]}>
+                  <Text style={[styles.menuPrice, isSelected && styles.menuPriceSelected]}>
                     ¥{newPrice.toLocaleString()}
                   </Text>
                 </View>
@@ -186,6 +201,10 @@ export default function SubscriptionScreen() {
           style={[styles.subButton, (!selectedPlan || !selectedMenu) && styles.subButtonDisabled]}
           onPress={handleSubscribe}
           disabled={!selectedPlan || !selectedMenu}
+          activeOpacity={0.85}
+          accessibilityRole="button"
+          accessibilityLabel="定期コースに申し込む"
+          accessibilityState={{ disabled: !selectedPlan || !selectedMenu }}
         >
           <Ionicons name="repeat" size={20} color={Colors.white} />
           <Text style={styles.subButtonText}>定期コースに申し込む</Text>
@@ -203,6 +222,7 @@ const styles = StyleSheet.create({
   },
   backBtn: { padding: Spacing.xs },
   headerTitle: { fontSize: FontSize.xl, fontWeight: '700', color: Colors.textPrimary },
+  headerSpacer: { width: 32 },
   content: { padding: Spacing.lg, paddingBottom: 180 },
 
   // Hero
@@ -277,12 +297,15 @@ const styles = StyleSheet.create({
     borderWidth: 2, borderColor: 'transparent',
   },
   menuCardSelected: { borderColor: Colors.primary, backgroundColor: Colors.primaryFaint },
+  menuInfoCol: { flex: 1, marginLeft: Spacing.md },
+  menuPriceRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 2 },
   menuName: { fontSize: FontSize.md, fontWeight: '600', color: Colors.textPrimary },
   menuOrigPrice: {
     fontSize: FontSize.sm, color: Colors.textMuted,
     textDecorationLine: 'line-through',
   },
   menuPrice: { fontSize: FontSize.md, fontWeight: '800', color: Colors.textPrimary },
+  menuPriceSelected: { color: Colors.primary },
   radio: {
     width: 24, height: 24, borderRadius: 12,
     borderWidth: 2, borderColor: Colors.border,

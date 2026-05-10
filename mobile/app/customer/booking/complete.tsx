@@ -114,7 +114,13 @@ export default function CompleteScreen() {
 
         {/* Actions */}
         <View style={styles.actions}>
-          <TouchableOpacity style={styles.reviewBtn} onPress={handleReview}>
+          <TouchableOpacity
+            style={styles.reviewBtn}
+            onPress={handleReview}
+            activeOpacity={0.85}
+            accessibilityRole="button"
+            accessibilityLabel="レビューを書く"
+          >
             <Ionicons name="star" size={20} color={Colors.white} />
             <Text style={styles.reviewBtnText}>レビューを書く</Text>
           </TouchableOpacity>
@@ -125,14 +131,26 @@ export default function CompleteScreen() {
           {/* パートナー広告 — 完了画面用 */}
           <AdBanner placement="order_complete" />
 
-          <TouchableOpacity style={styles.disputeBtn} onPress={handleDispute}>
+          <TouchableOpacity
+            style={styles.disputeBtn}
+            onPress={handleDispute}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel={`問題を報告 ${COMPLETION.DISPUTE_WINDOW_HOURS}時間以内`}
+          >
             <Ionicons name="alert-circle-outline" size={18} color={Colors.error} />
             <Text style={styles.disputeBtnText}>
               問題を報告（{COMPLETION.DISPUTE_WINDOW_HOURS}時間以内）
             </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.doneBtn} onPress={handleDone}>
+          <TouchableOpacity
+            style={styles.doneBtn}
+            onPress={handleDone}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="ホームに戻る"
+          >
             <Text style={styles.doneBtnText}>ホームに戻る</Text>
           </TouchableOpacity>
         </View>

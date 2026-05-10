@@ -182,6 +182,10 @@ export default function ProHome() {
           <TouchableOpacity
             style={styles.logoutBtn}
             onPress={() => signOut()}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="ログアウト"
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
             <Ionicons name="log-out-outline" size={22} color={Colors.textSecondary} />
           </TouchableOpacity>
@@ -215,6 +219,9 @@ export default function ProHome() {
               true: Colors.primarySoft,
             }}
             thumbColor={isOnline ? Colors.primary : Colors.textMuted}
+            accessibilityRole="switch"
+            accessibilityLabel="出張受付モード"
+            accessibilityState={{ checked: isOnline }}
           />
         </View>
 

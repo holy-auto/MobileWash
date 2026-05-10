@@ -9,6 +9,9 @@ import {
   TextInput,
   Modal,
   Alert,
+  KeyboardAvoidingView,
+  Platform,
+  Keyboard,
 } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Colors, Spacing, FontSize, BorderRadius } from '@/constants/colors';
@@ -94,6 +97,12 @@ export default function MenuScreen() {
       Alert.alert('エラー', 'カテゴリ・メニュー名・価格は必須です');
       return;
     }
+    const priceNum = parseInt(form.price, 10);
+    if (isNaN(priceNum) || priceNum < 0) {
+      Alert.alert('エラー', '価格は0以上の数値で入力してください');
+      return;
+    }
+    Keyboard.dismiss();
 
     if (editingMenu) {
       setMenus((prev) =>
@@ -102,7 +111,7 @@ export default function MenuScreen() {
             ? {
                 ...m,
                 ...form,
-                price: parseInt(form.price, 10),
+                price: priceNum,
               }
             : m
         )
@@ -113,7 +122,7 @@ export default function MenuScreen() {
         {
           id: Date.now().toString(),
           ...form,
-          price: parseInt(form.price, 10),
+          price: priceNum,
         },
       ]);
     }
@@ -141,7 +150,13 @@ export default function MenuScreen() {
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.header}>
           <Text style={styles.title}>メニュー管理</Text>
-          <TouchableOpacity style={styles.addButton} onPress={openNewMenu}>
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={openNewMenu}
+            activeOpacity={0.85}
+            accessibilityRole="button"
+            accessibilityLabel="新規メニューを追加"
+          >
             <Ionicons name="add" size={20} color={Colors.white} />
             <Text style={styles.addButtonText}>追加</Text>
           </TouchableOpacity>
@@ -178,12 +193,20 @@ export default function MenuScreen() {
                     <TouchableOpacity
                       onPress={() => openEditMenu(menu)}
                       style={styles.iconButton}
+                      activeOpacity={0.7}
+                      accessibilityRole="button"
+                      accessibilityLabel={`${menu.name}を編集`}
+                      hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                     >
                       <Ionicons name="create-outline" size={18} color={Colors.primary} />
                     </TouchableOpacity>
                     <TouchableOpacity
                       onPress={() => handleDelete(menu.id)}
                       style={styles.iconButton}
+                      activeOpacity={0.7}
+                      accessibilityRole="button"
+                      accessibilityLabel={`${menu.name}を削除`}
+                      hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                     >
                       <Ionicons name="trash-outline" size={18} color={Colors.error} />
                     </TouchableOpacity>
@@ -201,104 +224,154 @@ export default function MenuScreen() {
             <Text style={styles.emptySubtext}>
               「追加」からメニューを登録しましょう
             </Text>
+            <TouchableOpacity
+              style={styles.emptyCta}
+              onPress={openNewMenu}
+              activeOpacity={0.85}
+              accessibilityRole="button"
+              accessibilityLabel="メニューを追加"
+            >
+              <Ionicons name="add" size={18} color={Colors.white} />
+              <Text style={styles.emptyCtaText}>メニューを追加</Text>
+            </TouchableOpacity>
           </View>
         )}
       </ScrollView>
 
       {/* Add/Edit Modal */}
-      <Modal visible={showModal} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
+      <Modal
+        visible={showModal}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setShowModal(false)}
+      >
+        <KeyboardAvoidingView
+          style={styles.modalOverlay}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        >
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>
                 {editingMenu ? 'メニュー編集' : '新規メニュー'}
               </Text>
-              <TouchableOpacity onPress={() => setShowModal(false)}>
+              <TouchableOpacity
+                onPress={() => setShowModal(false)}
+                activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel="閉じる"
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
                 <Ionicons name="close" size={24} color={Colors.textSecondary} />
               </TouchableOpacity>
             </View>
 
-            {/* Category Selector */}
-            <Text style={styles.fieldLabel}>カテゴリ</Text>
             <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              style={styles.categorySelector}
+              keyboardShouldPersistTaps="handled"
+              keyboardDismissMode="on-drag"
+              showsVerticalScrollIndicator={false}
             >
-              {SERVICE_CATEGORIES.map((cat) => (
-                <TouchableOpacity
-                  key={cat.id}
-                  style={[
-                    styles.categorySelectorItem,
-                    form.categoryId === cat.id &&
-                      styles.categorySelectorItemActive,
-                  ]}
-                  onPress={() => setForm({ ...form, categoryId: cat.id })}
-                >
-                  <Text
+              {/* Category Selector */}
+              <Text style={styles.fieldLabel}>カテゴリ</Text>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={styles.categorySelector}
+                keyboardShouldPersistTaps="handled"
+              >
+                {SERVICE_CATEGORIES.map((cat) => (
+                  <TouchableOpacity
+                    key={cat.id}
                     style={[
-                      styles.categorySelectorText,
+                      styles.categorySelectorItem,
                       form.categoryId === cat.id &&
-                        styles.categorySelectorTextActive,
+                        styles.categorySelectorItemActive,
                     ]}
+                    onPress={() => setForm({ ...form, categoryId: cat.id })}
+                    activeOpacity={0.7}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: form.categoryId === cat.id }}
+                    accessibilityLabel={cat.name}
                   >
-                    {cat.name}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+                    <Text
+                      style={[
+                        styles.categorySelectorText,
+                        form.categoryId === cat.id &&
+                          styles.categorySelectorTextActive,
+                      ]}
+                    >
+                      {cat.name}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+
+              <Text style={styles.fieldLabel}>メニュー名</Text>
+              <TextInput
+                style={styles.input}
+                value={form.name}
+                onChangeText={(v) => setForm({ ...form, name: v })}
+                placeholder="例: 手洗い洗車"
+                placeholderTextColor={Colors.textMuted}
+                returnKeyType="next"
+                maxLength={50}
+              />
+
+              <View style={styles.rowInputs}>
+                <View style={styles.halfField}>
+                  <Text style={styles.fieldLabel}>価格 (¥)</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={form.price}
+                    onChangeText={(v) =>
+                      setForm({ ...form, price: v.replace(/[^0-9]/g, '') })
+                    }
+                    placeholder="3000"
+                    keyboardType="number-pad"
+                    placeholderTextColor={Colors.textMuted}
+                    returnKeyType="next"
+                    maxLength={7}
+                  />
+                </View>
+                <View style={styles.halfField}>
+                  <Text style={styles.fieldLabel}>所要時間</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={form.duration}
+                    onChangeText={(v) => setForm({ ...form, duration: v })}
+                    placeholder="30分"
+                    placeholderTextColor={Colors.textMuted}
+                    returnKeyType="next"
+                    maxLength={20}
+                  />
+                </View>
+              </View>
+
+              <Text style={styles.fieldLabel}>説明</Text>
+              <TextInput
+                style={[styles.input, styles.inputMultiline]}
+                value={form.description}
+                onChangeText={(v) => setForm({ ...form, description: v })}
+                placeholder="メニューの詳細説明"
+                multiline
+                numberOfLines={3}
+                maxLength={200}
+                placeholderTextColor={Colors.textMuted}
+              />
+
+              <TouchableOpacity
+                style={styles.saveButton}
+                onPress={handleSave}
+                activeOpacity={0.85}
+                accessibilityRole="button"
+                accessibilityLabel={editingMenu ? 'メニューを更新' : 'メニューを登録'}
+              >
+                <Text style={styles.saveButtonText}>
+                  {editingMenu ? '更新する' : '登録する'}
+                </Text>
+              </TouchableOpacity>
             </ScrollView>
-
-            <Text style={styles.fieldLabel}>メニュー名</Text>
-            <TextInput
-              style={styles.input}
-              value={form.name}
-              onChangeText={(v) => setForm({ ...form, name: v })}
-              placeholder="例: 手洗い洗車"
-              placeholderTextColor={Colors.textMuted}
-            />
-
-            <View style={styles.rowInputs}>
-              <View style={styles.halfField}>
-                <Text style={styles.fieldLabel}>価格 (¥)</Text>
-                <TextInput
-                  style={styles.input}
-                  value={form.price}
-                  onChangeText={(v) => setForm({ ...form, price: v })}
-                  placeholder="3000"
-                  keyboardType="numeric"
-                  placeholderTextColor={Colors.textMuted}
-                />
-              </View>
-              <View style={styles.halfField}>
-                <Text style={styles.fieldLabel}>所要時間</Text>
-                <TextInput
-                  style={styles.input}
-                  value={form.duration}
-                  onChangeText={(v) => setForm({ ...form, duration: v })}
-                  placeholder="30分"
-                  placeholderTextColor={Colors.textMuted}
-                />
-              </View>
-            </View>
-
-            <Text style={styles.fieldLabel}>説明</Text>
-            <TextInput
-              style={[styles.input, styles.inputMultiline]}
-              value={form.description}
-              onChangeText={(v) => setForm({ ...form, description: v })}
-              placeholder="メニューの詳細説明"
-              multiline
-              numberOfLines={3}
-              placeholderTextColor={Colors.textMuted}
-            />
-
-            <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-              <Text style={styles.saveButtonText}>
-                {editingMenu ? '更新する' : '登録する'}
-              </Text>
-            </TouchableOpacity>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
     </SafeAreaView>
   );
@@ -422,6 +495,21 @@ const styles = StyleSheet.create({
   emptySubtext: {
     fontSize: FontSize.sm,
     color: Colors.textMuted,
+  },
+  emptyCta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.primary,
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.lg,
+    borderRadius: BorderRadius.full,
+    gap: Spacing.xs,
+    marginTop: Spacing.md,
+  },
+  emptyCtaText: {
+    fontSize: FontSize.md,
+    fontWeight: '700',
+    color: Colors.white,
   },
   // Modal
   modalOverlay: {

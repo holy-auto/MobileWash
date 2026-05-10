@@ -16,7 +16,14 @@ import { QUALITY_AUDIT } from '@/constants/business-rules';
 import { submitAuditResponse } from '@/lib/quality-audit';
 
 const SCORE_LABELS = ['', '悪い', 'やや不満', '普通', '良い', 'とても良い'];
-const SCORE_COLORS = ['', '#EF4444', '#F59E0B', '#94A3B8', '#3B82F6', '#22C55E'];
+const SCORE_COLORS = [
+  '',
+  Colors.error,
+  Colors.warning,
+  Colors.textMuted,
+  Colors.primaryMedium,
+  Colors.success,
+];
 
 export default function QualityAuditScreen() {
   const router = useRouter();
@@ -157,7 +164,11 @@ export default function QualityAuditScreen() {
                 <Text style={styles.checkItemNumber}>{index + 1}</Text>
                 <Text style={styles.checkItemLabel}>{item.label}</Text>
               </View>
-              <View style={styles.scoreRow}>
+              <View
+                style={styles.scoreRow}
+                accessibilityRole="adjustable"
+                accessibilityLabel={`${item.label} の評価`}
+              >
                 {[1, 2, 3, 4, 5].map((score) => (
                   <TouchableOpacity
                     key={score}
@@ -169,6 +180,10 @@ export default function QualityAuditScreen() {
                       },
                     ]}
                     onPress={() => handleScore(item.id, score)}
+                    activeOpacity={0.7}
+                    accessibilityRole="button"
+                    accessibilityLabel={`${score}点 ${SCORE_LABELS[score]}`}
+                    accessibilityState={{ selected: selected === score }}
                   >
                     <Text
                       style={[

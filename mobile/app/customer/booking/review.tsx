@@ -7,11 +7,14 @@ import {
   SafeAreaView,
   TextInput,
   Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  Keyboard,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, FontSize, BorderRadius } from '@/constants/colors';
-import { REVIEW } from '@/constants/business-rules';
 
 export default function ReviewScreen() {
   const router = useRouter();
@@ -24,6 +27,7 @@ export default function ReviewScreen() {
       Alert.alert('エラー', '評価を選択してください');
       return;
     }
+    Keyboard.dismiss();
     // In production: save to Supabase
     Alert.alert('ありがとうございます', 'レビューが投稿されました', [
       { text: 'OK', onPress: () => router.dismissAll() },
@@ -32,76 +36,114 @@ export default function ReviewScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.dismissAll()} style={styles.backBtn}>
-          <Ionicons name="close" size={24} color={Colors.textPrimary} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>レビュー</Text>
-        <View style={{ width: 32 }} />
-      </View>
-
-      <View style={styles.content}>
-        <Text style={styles.proName}>{params.proName}</Text>
-        <Text style={styles.subtitle}>サービスはいかがでしたか？</Text>
-
-        {/* Star Rating */}
-        <View style={styles.starsRow}>
-          {[1, 2, 3, 4, 5].map((star) => (
-            <TouchableOpacity key={star} onPress={() => setRating(star)}>
-              <Ionicons
-                name={star <= rating ? 'star' : 'star-outline'}
-                size={44}
-                color={star <= rating ? Colors.gold : Colors.border}
-              />
-            </TouchableOpacity>
-          ))}
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <View style={styles.header}>
+          <TouchableOpacity
+            onPress={() => router.dismissAll()}
+            style={styles.backBtn}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="閉じる"
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
+            <Ionicons name="close" size={24} color={Colors.textPrimary} />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>レビュー</Text>
+          <View style={styles.headerSpacer} />
         </View>
-        <Text style={styles.ratingLabel}>
-          {rating === 0 && 'タップして評価'}
-          {rating === 1 && '不満'}
-          {rating === 2 && 'やや不満'}
-          {rating === 3 && '普通'}
-          {rating === 4 && '満足'}
-          {rating === 5 && '大変満足'}
-        </Text>
 
-        {/* Comment */}
-        <TextInput
-          style={styles.commentInput}
-          placeholder="コメントを入力（任意）"
-          placeholderTextColor={Colors.textMuted}
-          value={comment}
-          onChangeText={setComment}
-          multiline
-          numberOfLines={4}
-          textAlignVertical="top"
-        />
-
-        <Text style={styles.note}>
-          レビューは一方公開です（あなたのレビューはすぐに公開されます）
-        </Text>
-
-        <TouchableOpacity
-          style={[styles.submitBtn, rating === 0 && styles.submitBtnDisabled]}
-          onPress={handleSubmit}
-          disabled={rating === 0}
+        <ScrollView
+          contentContainerStyle={styles.content}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
         >
-          <Text style={styles.submitBtnText}>レビューを投稿</Text>
-        </TouchableOpacity>
+          <Text style={styles.proName}>{params.proName}</Text>
+          <Text style={styles.subtitle}>サービスはいかがでしたか？</Text>
 
-        <TouchableOpacity
-          style={styles.skipBtn}
-          onPress={() => router.dismissAll()}
-        >
-          <Text style={styles.skipBtnText}>スキップ</Text>
-        </TouchableOpacity>
-      </View>
+          {/* Star Rating */}
+          <View
+            style={styles.starsRow}
+            accessibilityRole="adjustable"
+            accessibilityLabel={`${rating}点 / 5点`}
+          >
+            {[1, 2, 3, 4, 5].map((star) => (
+              <TouchableOpacity
+                key={star}
+                onPress={() => setRating(star)}
+                activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel={`${star}点を選択`}
+                accessibilityState={{ selected: star === rating }}
+                hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+              >
+                <Ionicons
+                  name={star <= rating ? 'star' : 'star-outline'}
+                  size={44}
+                  color={star <= rating ? Colors.gold : Colors.border}
+                />
+              </TouchableOpacity>
+            ))}
+          </View>
+          <Text style={styles.ratingLabel}>
+            {rating === 0 && 'タップして評価'}
+            {rating === 1 && '不満'}
+            {rating === 2 && 'やや不満'}
+            {rating === 3 && '普通'}
+            {rating === 4 && '満足'}
+            {rating === 5 && '大変満足'}
+          </Text>
+
+          {/* Comment */}
+          <TextInput
+            style={styles.commentInput}
+            placeholder="コメントを入力（任意）"
+            placeholderTextColor={Colors.textMuted}
+            value={comment}
+            onChangeText={setComment}
+            multiline
+            numberOfLines={4}
+            maxLength={300}
+            textAlignVertical="top"
+          />
+
+          <Text style={styles.note}>
+            レビューは一方公開です（あなたのレビューはすぐに公開されます）
+          </Text>
+
+          <TouchableOpacity
+            style={[styles.submitBtn, rating === 0 && styles.submitBtnDisabled]}
+            onPress={handleSubmit}
+            disabled={rating === 0}
+            activeOpacity={0.85}
+            accessibilityRole="button"
+            accessibilityLabel="レビューを投稿"
+            accessibilityState={{ disabled: rating === 0 }}
+          >
+            <Text style={styles.submitBtnText}>レビューを投稿</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.skipBtn}
+            onPress={() => router.dismissAll()}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="レビューをスキップ"
+          >
+            <Text style={styles.skipBtnText}>スキップ</Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
+  flex: { flex: 1 },
+  headerSpacer: { width: 32 },
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     paddingHorizontal: Spacing.lg, paddingVertical: Spacing.md,

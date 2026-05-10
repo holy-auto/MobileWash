@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   SafeAreaView,
   ScrollView,
   Modal,
+  RefreshControl,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, FontSize, BorderRadius } from '@/constants/colors';
@@ -94,6 +95,14 @@ function getStatusIndex(status: string) {
 export default function OrdersScreen() {
   const [tab, setTab] = useState<Tab>('active');
   const [selectedOrder, setSelectedOrder] = useState<OrderItem | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true);
+    // Simulated delay; production would refetch from Supabase
+    await new Promise((resolve) => setTimeout(resolve, 600));
+    setRefreshing(false);
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -106,6 +115,10 @@ export default function OrdersScreen() {
         <TouchableOpacity
           style={[styles.tab, tab === 'active' && styles.tabActive]}
           onPress={() => setTab('active')}
+          activeOpacity={0.7}
+          accessibilityRole="tab"
+          accessibilityState={{ selected: tab === 'active' }}
+          accessibilityLabel="進行中の予約"
         >
           <Text style={[styles.tabText, tab === 'active' && styles.tabTextActive]}>
             進行中
@@ -119,6 +132,10 @@ export default function OrdersScreen() {
         <TouchableOpacity
           style={[styles.tab, tab === 'history' && styles.tabActive]}
           onPress={() => setTab('history')}
+          activeOpacity={0.7}
+          accessibilityRole="tab"
+          accessibilityState={{ selected: tab === 'history' }}
+          accessibilityLabel="予約履歴"
         >
           <Text style={[styles.tabText, tab === 'history' && styles.tabTextActive]}>
             履歴
@@ -126,7 +143,17 @@ export default function OrdersScreen() {
         </TouchableOpacity>
       </View>
 
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor={Colors.primary}
+            colors={[Colors.primary]}
+          />
+        }
+      >
         {tab === 'active' ? (
           MOCK_ACTIVE_ORDERS.length > 0 ? (
             MOCK_ACTIVE_ORDERS.map((order) => (
@@ -135,6 +162,8 @@ export default function OrdersScreen() {
                 style={styles.orderCard}
                 onPress={() => setSelectedOrder(order)}
                 activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel={`${order.service} ${order.proName}さんの予約、${ORDER_STATUSES.find(s => s.id === order.status)?.label ?? order.status}`}
               >
                 <View style={styles.orderHeader}>
                   <View>
@@ -199,7 +228,12 @@ export default function OrdersScreen() {
                 </View>
 
                 {order.status === 'pending_confirm' && (
-                  <TouchableOpacity style={styles.confirmButton}>
+                  <TouchableOpacity
+                    style={styles.confirmButton}
+                    activeOpacity={0.85}
+                    accessibilityRole="button"
+                    accessibilityLabel="作業完了を確認する"
+                  >
                     <Ionicons name="checkmark-circle" size={20} color={Colors.white} />
                     <Text style={styles.confirmButtonText}>作業完了を確認</Text>
                   </TouchableOpacity>
@@ -212,6 +246,11 @@ export default function OrdersScreen() {
               <Text style={styles.emptyText}>進行中の予約はありません</Text>
             </View>
           )
+        ) : MOCK_HISTORY.length === 0 ? (
+          <View style={styles.empty}>
+            <Ionicons name="time-outline" size={48} color={Colors.textMuted} />
+            <Text style={styles.emptyText}>履歴がまだありません</Text>
+          </View>
         ) : (
           MOCK_HISTORY.map((order) => (
             <TouchableOpacity
@@ -219,6 +258,8 @@ export default function OrdersScreen() {
               style={styles.historyCard}
               onPress={() => setSelectedOrder(order)}
               activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel={`${order.service} ${order.proName}さん、${order.date}、${order.price.toLocaleString()}円`}
             >
               <View style={styles.historyHeader}>
                 <View>
@@ -246,7 +287,12 @@ export default function OrdersScreen() {
                   <Text style={styles.reviewDoneText}>レビュー済み</Text>
                 </View>
               ) : (
-                <TouchableOpacity style={styles.reviewButton}>
+                <TouchableOpacity
+                  style={styles.reviewButton}
+                  activeOpacity={0.7}
+                  accessibilityRole="button"
+                  accessibilityLabel="レビューを書く"
+                >
                   <Ionicons name="star-outline" size={18} color={Colors.primary} />
                   <Text style={styles.reviewButtonText}>レビューを書く</Text>
                 </TouchableOpacity>
@@ -267,25 +313,35 @@ export default function OrdersScreen() {
           <SafeAreaView style={styles.detailContainer}>
             <View style={styles.detailHeader}>
               <Text style={styles.detailTitle}>予約詳細</Text>
-              <TouchableOpacity onPress={() => setSelectedOrder(null)}>
+              <TouchableOpacity
+                onPress={() => setSelectedOrder(null)}
+                activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel="閉じる"
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
                 <Ionicons name="close" size={28} color={Colors.textPrimary} />
               </TouchableOpacity>
             </View>
             <ScrollView contentContainerStyle={styles.detailContent}>
               {/* Status badge */}
               <View style={styles.detailStatusRow}>
-                <View style={[
-                  styles.detailStatusBadge,
-                  selectedOrder.status === 'completed'
-                    ? { backgroundColor: '#DCFCE7' }
-                    : { backgroundColor: Colors.primaryFaint },
-                ]}>
-                  <Text style={[
-                    styles.detailStatusText,
+                <View
+                  style={[
+                    styles.detailStatusBadge,
                     selectedOrder.status === 'completed'
-                      ? { color: '#22C55E' }
-                      : { color: Colors.primary },
-                  ]}>
+                      ? styles.detailStatusBadgeDone
+                      : styles.detailStatusBadgeActive,
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.detailStatusText,
+                      selectedOrder.status === 'completed'
+                        ? styles.detailStatusTextDone
+                        : styles.detailStatusTextActive,
+                    ]}
+                  >
                     {selectedOrder.status === 'completed' ? '完了' : '進行中'}
                   </Text>
                 </View>
@@ -298,8 +354,8 @@ export default function OrdersScreen() {
                 <Text style={styles.detailServiceName}>{selectedOrder.service}</Text>
                 {selectedOrder.menus && selectedOrder.menus.length > 0 && (
                   <View style={styles.detailMenuList}>
-                    {selectedOrder.menus.map((menu, i) => (
-                      <View key={i} style={styles.detailMenuItem}>
+                    {selectedOrder.menus.map((menu) => (
+                      <View key={menu} style={styles.detailMenuItem}>
                         <Ionicons name="checkmark-circle" size={16} color={Colors.success} />
                         <Text style={styles.detailMenuText}>{menu}</Text>
                       </View>
@@ -315,15 +371,20 @@ export default function OrdersScreen() {
                   <View style={styles.detailProAvatar}>
                     <Ionicons name="person" size={24} color={Colors.primaryMedium} />
                   </View>
-                  <View style={{ flex: 1 }}>
+                  <View style={styles.detailProTextCol}>
                     <Text style={styles.detailProName}>{selectedOrder.proName}</Text>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 }}>
+                    <View style={styles.detailProRatingRow}>
                       <Ionicons name="star" size={14} color={Colors.gold} />
                       <Text style={styles.detailProRating}>{selectedOrder.proRating ?? '-'}</Text>
                     </View>
                   </View>
                   {selectedOrder.proPhone && (
-                    <TouchableOpacity style={styles.detailCallButton}>
+                    <TouchableOpacity
+                      style={styles.detailCallButton}
+                      activeOpacity={0.7}
+                      accessibilityRole="button"
+                      accessibilityLabel={`${selectedOrder.proName}さんに電話`}
+                    >
                       <Ionicons name="call-outline" size={20} color={Colors.primary} />
                     </TouchableOpacity>
                   )}
@@ -380,7 +441,12 @@ export default function OrdersScreen() {
 
               {/* Review section for completed orders */}
               {selectedOrder.status === 'completed' && !selectedOrder.reviewed && (
-                <TouchableOpacity style={styles.detailReviewButton}>
+                <TouchableOpacity
+                  style={styles.detailReviewButton}
+                  activeOpacity={0.85}
+                  accessibilityRole="button"
+                  accessibilityLabel="レビューを書く"
+                >
                   <Ionicons name="star-outline" size={20} color={Colors.white} />
                   <Text style={styles.detailReviewButtonText}>レビューを書く</Text>
                 </TouchableOpacity>
@@ -696,10 +762,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: BorderRadius.full,
   },
+  detailStatusBadgeActive: { backgroundColor: Colors.primaryFaint },
+  detailStatusBadgeDone: { backgroundColor: '#DCFCE7' },
   detailStatusText: {
     fontSize: FontSize.sm,
     fontWeight: '700',
   },
+  detailStatusTextActive: { color: Colors.primary },
+  detailStatusTextDone: { color: Colors.success },
   detailDate: {
     fontSize: FontSize.sm,
     color: Colors.textMuted,
@@ -750,6 +820,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: Spacing.md,
+  },
+  detailProTextCol: { flex: 1 },
+  detailProRatingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: 2,
   },
   detailProName: {
     fontSize: FontSize.md,

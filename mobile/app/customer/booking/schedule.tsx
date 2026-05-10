@@ -66,11 +66,18 @@ export default function ScheduleScreen() {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          style={styles.backBtn}
+          activeOpacity={0.7}
+          accessibilityRole="button"
+          accessibilityLabel="戻る"
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        >
           <Ionicons name="arrow-back" size={24} color={Colors.textPrimary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>日時を指定して予約</Text>
-        <View style={{ width: 32 }} />
+        <View style={styles.headerSpacer} />
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
@@ -98,11 +105,15 @@ export default function ScheduleScreen() {
                 key={d.date}
                 style={[styles.dateCard, isSelected && styles.dateCardSelected]}
                 onPress={() => setSelectedDate(d.date)}
+                activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityState={{ selected: isSelected }}
+                accessibilityLabel={`${d.label} ${d.dayOfWeek}曜日`}
               >
                 <Text style={[
                   styles.dateDow,
                   isSelected && styles.dateDowSelected,
-                  isWeekend && !isSelected && { color: Colors.error },
+                  isWeekend && !isSelected && styles.dateDowWeekend,
                 ]}>
                   {d.dayOfWeek}
                 </Text>
@@ -115,7 +126,7 @@ export default function ScheduleScreen() {
         </ScrollView>
 
         {/* Time Selection */}
-        <Text style={[styles.sectionLabel, { marginTop: Spacing.xl }]}>時間を選択</Text>
+        <Text style={[styles.sectionLabel, styles.sectionLabelGap]}>時間を選択</Text>
         <View style={styles.timeGrid}>
           {SCHEDULED_BOOKING.TIME_SLOTS.map((time) => {
             const isSelected = selectedTime === time;
@@ -124,6 +135,10 @@ export default function ScheduleScreen() {
                 key={time}
                 style={[styles.timeCard, isSelected && styles.timeCardSelected]}
                 onPress={() => setSelectedTime(time)}
+                activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityState={{ selected: isSelected }}
+                accessibilityLabel={`${time}を選択`}
               >
                 <Text style={[styles.timeText, isSelected && styles.timeTextSelected]}>
                   {time}
@@ -152,6 +167,10 @@ export default function ScheduleScreen() {
           style={[styles.bookButton, !canBook && styles.bookButtonDisabled]}
           onPress={handleBook}
           disabled={!canBook}
+          activeOpacity={0.85}
+          accessibilityRole="button"
+          accessibilityLabel="この日時でメニューを選ぶ"
+          accessibilityState={{ disabled: !canBook }}
         >
           <Ionicons name="calendar-outline" size={20} color={Colors.white} />
           <Text style={styles.bookButtonText}>この日時でメニューを選ぶ</Text>
@@ -169,6 +188,7 @@ const styles = StyleSheet.create({
   },
   backBtn: { padding: Spacing.xs },
   headerTitle: { fontSize: FontSize.xl, fontWeight: '700', color: Colors.textPrimary },
+  headerSpacer: { width: 32 },
   content: { padding: Spacing.lg, paddingBottom: 140 },
 
   // Info
@@ -184,6 +204,7 @@ const styles = StyleSheet.create({
     fontSize: FontSize.md, fontWeight: '700', color: Colors.textPrimary,
     marginBottom: Spacing.md,
   },
+  sectionLabelGap: { marginTop: Spacing.xl },
 
   // Dates
   dateScroll: { gap: Spacing.sm, paddingRight: Spacing.lg },
@@ -202,6 +223,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   dateDowSelected: { color: Colors.primaryPale },
+  dateDowWeekend: { color: Colors.error },
   dateLabel: {
     fontSize: FontSize.lg, fontWeight: '700', color: Colors.textPrimary,
   },

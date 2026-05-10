@@ -94,20 +94,27 @@ const ProCard = memo(({ pro, onCallPro }: { pro: (typeof MOCK_RESULTS)[number]; 
     </View>
 
     <View style={styles.menuList}>
-      {pro.menus.map((menu, idx) => (
-        <View key={idx} style={styles.menuItem}>
+      {pro.menus.map((menu) => (
+        <View key={menu.name} style={styles.menuItem}>
           <Text style={styles.menuName}>{menu.name}</Text>
           <Text style={styles.menuPrice}>¥{menu.price.toLocaleString()}</Text>
         </View>
       ))}
     </View>
 
-    <TouchableOpacity style={styles.callButton} onPress={onCallPro}>
+    <TouchableOpacity
+      style={styles.callButton}
+      onPress={onCallPro}
+      activeOpacity={0.85}
+      accessibilityRole="button"
+      accessibilityLabel={`${pro.name}さんを呼ぶ`}
+    >
       <Ionicons name="car-sport" size={18} color={Colors.white} />
       <Text style={styles.callButtonText}>このプロを呼ぶ</Text>
     </TouchableOpacity>
   </TouchableOpacity>
 ));
+ProCard.displayName = 'ProCard';
 
 export default function SearchScreen() {
   const { requireAuth } = useAuth();
@@ -149,9 +156,19 @@ export default function SearchScreen() {
             placeholderTextColor={Colors.textMuted}
             value={query}
             onChangeText={setQuery}
+            returnKeyType="search"
+            autoCapitalize="none"
+            autoCorrect={false}
+            clearButtonMode="never"
           />
           {query.length > 0 && (
-            <TouchableOpacity onPress={() => setQuery('')}>
+            <TouchableOpacity
+              onPress={() => setQuery('')}
+              activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel="検索をクリア"
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            >
               <Ionicons name="close-circle" size={20} color={Colors.textMuted} />
             </TouchableOpacity>
           )}
@@ -167,6 +184,10 @@ export default function SearchScreen() {
               styles.categoryCard,
               selectedCategory === cat.id && styles.categoryCardActive,
             ]}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityState={{ selected: selectedCategory === cat.id }}
+            accessibilityLabel={cat.name}
             onPress={() =>
               setSelectedCategory(selectedCategory === cat.id ? null : cat.id)
             }
@@ -216,6 +237,18 @@ export default function SearchScreen() {
         removeClippedSubviews
         maxToRenderPerBatch={5}
         windowSize={5}
+        ListEmptyComponent={
+          <View style={styles.emptyResults}>
+            <Ionicons name="search-outline" size={40} color={Colors.textMuted} />
+            <Text style={styles.emptyResultsTitle}>
+              該当するプロが見つかりません
+            </Text>
+            <Text style={styles.emptyResultsSub}>
+              キーワードやカテゴリを変えて再度お試しください
+            </Text>
+          </View>
+        }
+        keyboardShouldPersistTaps="handled"
       />
     </SafeAreaView>
   );
@@ -295,6 +328,24 @@ const styles = StyleSheet.create({
   resultsList: {
     paddingHorizontal: Spacing.lg,
     paddingBottom: Spacing.xxl,
+    flexGrow: 1,
+  },
+  emptyResults: {
+    alignItems: 'center',
+    paddingTop: Spacing.xxl,
+    gap: Spacing.xs,
+  },
+  emptyResultsTitle: {
+    fontSize: FontSize.md,
+    fontWeight: '700',
+    color: Colors.textPrimary,
+    marginTop: Spacing.sm,
+  },
+  emptyResultsSub: {
+    fontSize: FontSize.sm,
+    color: Colors.textMuted,
+    textAlign: 'center',
+    paddingHorizontal: Spacing.lg,
   },
   resultCard: {
     backgroundColor: Colors.card,

@@ -8,6 +8,9 @@ import {
   ScrollView,
   TextInput,
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  Keyboard,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -53,7 +56,7 @@ export default function ReviewScreen() {
 
   const handleSubmit = () => {
     if (rating === 0) return;
-
+    Keyboard.dismiss();
     setSubmitting(true);
 
     // Demo mode: simulate API call
@@ -89,7 +92,7 @@ export default function ReviewScreen() {
                   key={star}
                   name={star <= rating ? 'star' : 'star-outline'}
                   size={28}
-                  color="#F59E0B"
+                  color={Colors.warning}
                 />
               ))}
             </View>
@@ -103,6 +106,9 @@ export default function ReviewScreen() {
           <TouchableOpacity
             style={styles.doneButton}
             onPress={() => router.back()}
+            activeOpacity={0.85}
+            accessibilityRole="button"
+            accessibilityLabel="閉じる"
           >
             <Text style={styles.doneButtonText}>閉じる</Text>
           </TouchableOpacity>
@@ -114,16 +120,31 @@ export default function ReviewScreen() {
   // --- Main review form ---
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={24} color={Colors.textPrimary} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>レビュー</Text>
-        <View style={{ width: 32 }} />
-      </View>
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        {/* Header */}
+        <View style={styles.header}>
+          <TouchableOpacity
+            onPress={() => router.back()}
+            style={styles.backBtn}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="戻る"
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
+            <Ionicons name="arrow-back" size={24} color={Colors.textPrimary} />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>レビュー</Text>
+          <View style={styles.headerSpacer} />
+        </View>
 
-      <ScrollView contentContainerStyle={styles.content}>
+        <ScrollView
+          contentContainerStyle={styles.content}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+        >
         {/* Pro name */}
         {proName ? (
           <Text style={styles.proName}>{proName}さんはいかがでしたか？</Text>
@@ -132,18 +153,26 @@ export default function ReviewScreen() {
         )}
 
         {/* Star rating */}
-        <View style={styles.starsContainer}>
+        <View
+          style={styles.starsContainer}
+          accessibilityRole="adjustable"
+          accessibilityLabel={`${rating}点 / 5点`}
+        >
           {[1, 2, 3, 4, 5].map((star) => (
             <TouchableOpacity
               key={star}
               onPress={() => setRating(star)}
               activeOpacity={0.7}
               style={styles.starTouchable}
+              accessibilityRole="button"
+              accessibilityLabel={`${star}点を選択`}
+              accessibilityState={{ selected: star === rating }}
+              hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
             >
               <Ionicons
                 name={star <= rating ? 'star' : 'star-outline'}
                 size={40}
-                color="#F59E0B"
+                color={Colors.warning}
               />
             </TouchableOpacity>
           ))}
@@ -173,6 +202,9 @@ export default function ReviewScreen() {
                 style={[styles.tagBadge, selected && styles.tagBadgeSelected]}
                 onPress={() => toggleTag(tag)}
                 activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityState={{ selected }}
+                accessibilityLabel={tag}
               >
                 <Text
                   style={[
@@ -204,32 +236,38 @@ export default function ReviewScreen() {
         </View>
       </ScrollView>
 
-      {/* Bottom CTA */}
-      <View style={styles.bottomBar}>
-        <TouchableOpacity
-          style={[
-            styles.submitButton,
-            rating === 0 && styles.submitButtonDisabled,
-          ]}
-          onPress={handleSubmit}
-          disabled={rating === 0 || submitting}
-        >
-          {submitting ? (
-            <ActivityIndicator color={Colors.white} />
-          ) : (
-            <>
-              <Ionicons name="send" size={18} color={Colors.white} />
-              <Text style={styles.submitButtonText}>レビューを送信</Text>
-            </>
-          )}
-        </TouchableOpacity>
-      </View>
+        {/* Bottom CTA */}
+        <View style={styles.bottomBar}>
+          <TouchableOpacity
+            style={[
+              styles.submitButton,
+              rating === 0 && styles.submitButtonDisabled,
+            ]}
+            onPress={handleSubmit}
+            disabled={rating === 0 || submitting}
+            activeOpacity={0.85}
+            accessibilityRole="button"
+            accessibilityLabel="レビューを送信"
+            accessibilityState={{ disabled: rating === 0 || submitting }}
+          >
+            {submitting ? (
+              <ActivityIndicator color={Colors.white} />
+            ) : (
+              <>
+                <Ionicons name="send" size={18} color={Colors.white} />
+                <Text style={styles.submitButtonText}>レビューを送信</Text>
+              </>
+            )}
+          </TouchableOpacity>
+        </View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
+  flex: { flex: 1 },
 
   // Header
   header: {
@@ -240,6 +278,7 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.md,
   },
   backBtn: { padding: Spacing.xs },
+  headerSpacer: { width: 32 },
   headerTitle: {
     fontSize: FontSize.xl,
     fontWeight: '700',

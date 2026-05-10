@@ -15,11 +15,11 @@ type Result<T = unknown> = {
 
 type BadgeDefinition = (typeof SKILL_BADGES.BADGES)[number];
 
-type EarnedBadge = {
+type EarnedBadge = Omit<BadgeDefinition, 'id'> & {
   id: string;
   badge_id: SkillBadgeId;
   earned_at: string;
-} & BadgeDefinition;
+};
 
 // ---------------------------------------------------------------------------
 // Badge requirement checkers
@@ -244,10 +244,10 @@ export async function getProBadges(
         const meta = badgeMap.get(row.badge_id);
         if (!meta) return null;
         return {
+          ...meta,
           id: row.id,
           badge_id: row.badge_id as SkillBadgeId,
           earned_at: row.earned_at,
-          ...meta,
         };
       })
       .filter(Boolean) as EarnedBadge[];

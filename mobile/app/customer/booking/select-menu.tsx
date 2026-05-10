@@ -62,7 +62,14 @@ export default function SelectMenuScreen() {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          style={styles.backBtn}
+          activeOpacity={0.7}
+          accessibilityRole="button"
+          accessibilityLabel="戻る"
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        >
           <Ionicons name="arrow-back" size={24} color={Colors.textPrimary} />
         </TouchableOpacity>
         <View>
@@ -80,6 +87,9 @@ export default function SelectMenuScreen() {
               style={[styles.menuCard, selected && styles.menuCardSelected]}
               onPress={() => toggleMenu(menu.id)}
               activeOpacity={0.7}
+              accessibilityRole="checkbox"
+              accessibilityState={{ checked: selected }}
+              accessibilityLabel={`${menu.name} ${menu.price.toLocaleString()}円 ${menu.duration}`}
             >
               <View style={styles.menuLeft}>
                 <MaterialCommunityIcons
@@ -118,7 +128,13 @@ export default function SelectMenuScreen() {
               ¥{totalPrice.toLocaleString()}
             </Text>
           </View>
-          <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
+          <TouchableOpacity
+            style={styles.nextButton}
+            onPress={handleNext}
+            activeOpacity={0.85}
+            accessibilityRole="button"
+            accessibilityLabel="決済画面へ進む"
+          >
             <Text style={styles.nextButtonText}>決済へ進む</Text>
             <Ionicons name="arrow-forward" size={20} color={Colors.white} />
           </TouchableOpacity>

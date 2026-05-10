@@ -115,7 +115,15 @@ export default function PaymentScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          style={styles.backBtn}
+          activeOpacity={0.7}
+          accessibilityRole="button"
+          accessibilityLabel="戻る"
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          disabled={processing}
+        >
           <Ionicons name="arrow-back" size={24} color={Colors.textPrimary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>お支払い</Text>
@@ -146,6 +154,10 @@ export default function PaymentScreen() {
               paymentMethod === PAYMENT_METHOD.ONLINE && styles.paymentOptionActive,
             ]}
             onPress={() => setPaymentMethod(PAYMENT_METHOD.ONLINE)}
+            activeOpacity={0.7}
+            accessibilityRole="radio"
+            accessibilityState={{ selected: paymentMethod === PAYMENT_METHOD.ONLINE }}
+            accessibilityLabel="オンライン決済"
           >
             <Ionicons
               name="card"
@@ -179,6 +191,10 @@ export default function PaymentScreen() {
               paymentMethod === PAYMENT_METHOD.CASH && styles.paymentOptionActive,
             ]}
             onPress={() => setPaymentMethod(PAYMENT_METHOD.CASH)}
+            activeOpacity={0.7}
+            accessibilityRole="radio"
+            accessibilityState={{ selected: paymentMethod === PAYMENT_METHOD.CASH }}
+            accessibilityLabel="現金決済"
           >
             <Ionicons
               name="cash"
@@ -241,6 +257,10 @@ export default function PaymentScreen() {
           style={[styles.confirmBtn, processing && styles.confirmBtnDisabled]}
           onPress={handleConfirmOrder}
           disabled={processing}
+          activeOpacity={0.85}
+          accessibilityRole="button"
+          accessibilityLabel="依頼を確定する"
+          accessibilityState={{ disabled: processing, busy: processing }}
         >
           {processing ? (
             <ActivityIndicator color={Colors.white} />

@@ -57,6 +57,8 @@ export default function RoleSelectScreen() {
               style={styles.roleCard}
               activeOpacity={0.7}
               onPress={() => handleSelectRole(item.role)}
+              accessibilityRole="button"
+              accessibilityLabel={`${item.title}：${item.subtitle}`}
             >
               <View style={[styles.roleIcon, { backgroundColor: item.color }]}>
                 <Ionicons name={item.icon} size={36} color={Colors.white} />
