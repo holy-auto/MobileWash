@@ -5,6 +5,7 @@ const config = getDefaultConfig(__dirname);
 
 const nativeOnlyModules = [
   'react-native-maps',
+  '@stripe/stripe-react-native',
 ];
 
 // On web, redirect native-only modules to web shims
