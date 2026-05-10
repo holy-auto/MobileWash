@@ -16,551 +16,827 @@ const { width: SW, height: SH } = Dimensions.get('window');
 
 type Props = { onFinish: () => void };
 
-// ─── Module-level guard: survives React Strict Mode remounts ───
+// Module-level guard: survives React Strict Mode full remounts
 let _animationStarted = false;
 
-// ─── Foam bubbles (泡) — グリッド配置 + 左右交互噴射 + 自然なバラつき ───
-const GRID_COLS = 6;
-const GRID_ROWS = 10;
-const CELL_W = SW / GRID_COLS;
-const CELL_H = SH / GRID_ROWS;
-const FOAM_GRID = Array.from({ length: GRID_COLS * GRID_ROWS }, (_, i) => {
-  const col = i % GRID_COLS;
-  const row = Math.floor(i / GRID_COLS);
-  const fromRight = row % 2 === 0;
-  // サイズに大小のバラつき（小さい泡と大きい泡が混在）
-  const sizeBase = Math.max(CELL_W, CELL_H);
-  const isTiny = Math.random() < 0.2; // 20%は小さい泡
-  const size = isTiny
-    ? sizeBase * 0.6 + Math.random() * 20
-    : sizeBase * 1.3 + Math.random() * 40;
-  return {
-    id: i,
-    size,
-    fromRight,
-    startX: fromRight
-      ? SW + Math.random() * SW * 0.3
-      : -(size + Math.random() * SW * 0.3),
-    startY: row * CELL_H + CELL_H * 0.5 + (Math.random() - 0.5) * CELL_H * 0.4,
-    endX: col * CELL_W + CELL_W * 0.5 + (Math.random() - 0.5) * CELL_W * 0.4,
-    endY: row * CELL_H + CELL_H * 0.5 + (Math.random() - 0.5) * CELL_H * 0.4,
-    // 噴射タイミングのバラつき
-    delay: Math.random() * 550,
-    opacity: 0.9 + Math.random() * 0.1,
-    // 飛行速度のバラつき（400~700ms）
-    flyDuration: 400 + Math.random() * 300,
-    // 着地後の揺れ幅
-    wobble: 2 + Math.random() * 4,
-    // ポップ時のランダムディレイ
-    popDelay: Math.random() * 1000,
-    // ポップ時に少し浮くか沈むか
-    popDriftY: (Math.random() - 0.4) * 15, // 上方向バイアス
-  };
-});
+// ─────────────────────────────────────────────
+// Cyberpunk neon palette
+// ─────────────────────────────────────────────
+const NEON = {
+  cyan: '#00F0FF',
+  magenta: '#FF2EC4',
+  hotPink: '#FF006E',
+  purple: '#9D00FF',
+  white: '#EAF6FF',
+  amber: '#FFB800',
+};
 
-// ─── Water drip trails (水滴) — 多めでリアルに ───
-const DRIP_COUNT = 18;
-const DRIPS = Array.from({ length: DRIP_COUNT }, (_, i) => ({
+// ─────────────────────────────────────────────
+// Static decoration data (positions / sizes)
+// ─────────────────────────────────────────────
+
+// Stars: small twinkling points in the upper sky.
+const STARS = Array.from({ length: 36 }, (_, i) => ({
   id: i,
-  x: SW * 0.03 + Math.random() * SW * 0.94,
-  size: 2 + Math.random() * 5,
-  delay: 100 + Math.random() * 700,
-  speed: 800 + Math.random() * 1200,
+  x: Math.random() * SW,
+  y: Math.random() * SH * 0.42,
+  size: 1 + Math.random() * 2.5,
+  delay: Math.random() * 800,
+  twinkle: 1200 + Math.random() * 1800,
+}));
+
+// City building silhouettes along the horizon line.
+const HORIZON_Y = SH * 0.5; // road horizon (vanishing point baseline)
+const BUILDINGS = (() => {
+  const rng = (seed: number) => {
+    const x = Math.sin(seed * 9999) * 10000;
+    return x - Math.floor(x);
+  };
+  return Array.from({ length: 16 }, (_, i) => {
+    const w = 26 + rng(i + 1) * 70;
+    const h = 50 + rng(i + 17) * 130;
+    return {
+      id: i,
+      x: (SW / 16) * i + (rng(i + 5) - 0.5) * 16,
+      w,
+      h,
+      neonColor: i % 3 === 0 ? NEON.magenta : i % 3 === 1 ? NEON.cyan : NEON.purple,
+      windows: Array.from({ length: Math.floor(h / 14) }, (_, j) => ({
+        lit: rng(i * 100 + j) > 0.55,
+        warm: rng(i * 200 + j) > 0.5,
+      })),
+    };
+  });
+})();
+
+// Lane center dashes: 0 = at vanishing point, 1 = past camera (off-screen below).
+const LANE_DASH_COUNT = 8;
+const LANES = Array.from({ length: LANE_DASH_COUNT }, (_, i) => ({
+  id: i,
+  delayOffset: i * (1000 / LANE_DASH_COUNT),
+}));
+
+// Speed streaks: horizontal neon lines passing the camera.
+const SPEED_STREAKS = Array.from({ length: 16 }, (_, i) => ({
+  id: i,
+  y: HORIZON_Y + 20 + (i / 16) * (SH - HORIZON_Y - 80),
+  width: 80 + Math.random() * 240,
+  color: i % 4 === 0 ? NEON.magenta : i % 4 === 1 ? NEON.cyan : i % 4 === 2 ? '#FFFFFF' : NEON.purple,
+  delay: Math.random() * 1200,
+  loops: 3 + Math.floor(Math.random() * 3),
+  speed: 280 + Math.random() * 220,
+}));
+
+// Side guardrail neon poles
+const GUARD_POLES = Array.from({ length: 6 }, (_, i) => ({
+  id: i,
+  side: i % 2 === 0 ? 'left' : 'right',
+  delay: i * 220,
 }));
 
 export default function SplashScreen({ onFinish }: Props) {
-  // ─── Overall ───
+  // === Scene-level ===
   const overallFade = useRef(new Animated.Value(1)).current;
+  const sceneOpacity = useRef(new Animated.Value(0)).current;
+  const cameraShakeX = useRef(new Animated.Value(0)).current;
 
-  // ─── Solid white overlay that fades in to guarantee full coverage ───
-  const foamOverlayOpacity = useRef(new Animated.Value(0)).current;
+  // === Stars ===
+  const starAnims = useMemo(() => STARS.map(() => new Animated.Value(0)), []);
 
-  // ─── Phase 1: Foam spray ───
-  const foamAnims = useMemo(
-    () =>
-      FOAM_GRID.map(() => ({
-        translateX: new Animated.Value(0),
-        translateY: new Animated.Value(0),
-        scale: new Animated.Value(0),
-        opacity: new Animated.Value(0),
-        wobbleX: new Animated.Value(0),
-      })),
+  // === Lane dashes (perspective) ===
+  const laneAnims = useMemo(
+    () => LANES.map(() => new Animated.Value(0)),
     [],
   );
 
-  // ─── Phase 2: Water rinse (top→bottom curtain) ───
-  const waterY = useRef(new Animated.Value(-SH)).current;
-  const waterOpacity = useRef(new Animated.Value(0)).current;
-
-  // ─── Phase 2b: Water drip trails ───
-  const dripAnims = useMemo(
+  // === Speed streaks ===
+  const streakAnims = useMemo(
     () =>
-      DRIPS.map(() => ({
-        translateY: new Animated.Value(0),
+      SPEED_STREAKS.map(() => ({
+        x: new Animated.Value(SW + 200),
         opacity: new Animated.Value(0),
       })),
     [],
   );
 
-  // ─── Phase 3: Logo reveal ───
-  const logoScale = useRef(new Animated.Value(0.5)).current;
+  // === Side neon poles (zooming past) ===
+  const poleAnims = useMemo(
+    () =>
+      GUARD_POLES.map(() => new Animated.Value(0)),
+    [],
+  );
+
+  // === Car (the hero) ===
+  const carScale = useRef(new Animated.Value(0.04)).current;
+  const carY = useRef(new Animated.Value(-SH * 0.18)).current;
+  const carOpacity = useRef(new Animated.Value(0)).current;
+  const carWobble = useRef(new Animated.Value(0)).current;
+
+  // === Headlights ===
+  const headlightGlow = useRef(new Animated.Value(0)).current;
+  const headlightFlare = useRef(new Animated.Value(0)).current;
+
+  // === Underglow neon ===
+  const underglowOpacity = useRef(new Animated.Value(0)).current;
+
+  // === Brake light ===
+  const brakeLight = useRef(new Animated.Value(0)).current;
+
+  // === Flash burst (car → logo morph) ===
+  const flashOpacity = useRef(new Animated.Value(0)).current;
+
+  // === Logo ===
   const logoOpacity = useRef(new Animated.Value(0)).current;
-  const logoRotate = useRef(new Animated.Value(0.1)).current;
-  const glowOpacity = useRef(new Animated.Value(0)).current;
-  const glowScale = useRef(new Animated.Value(0.8)).current;
+  const logoScale = useRef(new Animated.Value(0.6)).current;
+  const ringRotate = useRef(new Animated.Value(0)).current;
+  const logoGlow = useRef(new Animated.Value(0.3)).current;
 
-  // Shine sweep
-  const shineX = useRef(new Animated.Value(-100)).current;
-  const shineOpacity = useRef(new Animated.Value(0)).current;
-
-  // ─── Phase 4: Title & tagline ───
+  // === Title + tagline ===
   const titleOpacity = useRef(new Animated.Value(0)).current;
-  const titleY = useRef(new Animated.Value(25)).current;
+  const titleY = useRef(new Animated.Value(20)).current;
+  const titleGlowAlt = useRef(new Animated.Value(0)).current;
   const taglineOpacity = useRef(new Animated.Value(0)).current;
   const taglineY = useRef(new Animated.Value(15)).current;
 
-  // ─── Bottom dots ───
+  // === Bottom dots ===
   const dotsOpacity = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    // Module-level guard: survives React Strict Mode full remounts
     if (_animationStarted) return;
     _animationStarted = true;
 
     const timers: ReturnType<typeof setTimeout>[] = [];
+    const loops: Animated.CompositeAnimation[] = [];
 
-    // =========================================
-    // PHASE 1: Foam spray (t=0 ~ 800ms)
-    // 泡が左右から交互にスプレーのように飛んでくる + 白オーバーレイ
-    // =========================================
-
-    // Solid white overlay fades in alongside bubbles for guaranteed coverage
-    Animated.timing(foamOverlayOpacity, {
+    // ============================================
+    // PHASE 1: Scene fade-in (0-500ms)
+    // ============================================
+    Animated.timing(sceneOpacity, {
       toValue: 1,
-      duration: 700,
-      delay: 200,
+      duration: 500,
       useNativeDriver: true,
     }).start();
 
-    FOAM_GRID.forEach((f, i) => {
+    // Stars twinkle
+    starAnims.forEach((a, i) => {
       const t = setTimeout(() => {
-        Animated.parallel([
-          // 減速カーブで着地（スッと止まる）
-          Animated.timing(foamAnims[i].translateX, {
-            toValue: f.endX - f.startX,
-            duration: f.flyDuration,
-            easing: Easing.out(Easing.cubic),
-            useNativeDriver: true,
-          }),
-          Animated.timing(foamAnims[i].translateY, {
-            toValue: f.endY - f.startY,
-            duration: f.flyDuration,
-            easing: Easing.out(Easing.cubic),
-            useNativeDriver: true,
-          }),
-          Animated.spring(foamAnims[i].scale, {
-            toValue: 1,
-            tension: 35,
-            friction: 5,
-            useNativeDriver: true,
-          }),
-          Animated.timing(foamAnims[i].opacity, {
-            toValue: f.opacity,
-            duration: 250,
-            useNativeDriver: true,
-          }),
-        ]).start(() => {
-          // 着地後にプルプル揺れる
+        const loop = Animated.loop(
           Animated.sequence([
-            Animated.timing(foamAnims[i].wobbleX, {
-              toValue: f.wobble,
-              duration: 120,
-              easing: Easing.inOut(Easing.sin),
+            Animated.timing(a, {
+              toValue: 0.6 + Math.random() * 0.4,
+              duration: STARS[i].twinkle,
               useNativeDriver: true,
             }),
-            Animated.timing(foamAnims[i].wobbleX, {
-              toValue: -f.wobble * 0.6,
-              duration: 100,
-              easing: Easing.inOut(Easing.sin),
+            Animated.timing(a, {
+              toValue: 0.15,
+              duration: STARS[i].twinkle,
               useNativeDriver: true,
             }),
-            Animated.timing(foamAnims[i].wobbleX, {
-              toValue: 0,
-              duration: 80,
-              easing: Easing.out(Easing.sin),
-              useNativeDriver: true,
-            }),
-          ]).start();
-        });
-      }, f.delay);
+          ]),
+        );
+        loop.start();
+        loops.push(loop);
+      }, STARS[i].delay);
       timers.push(t);
     });
 
-    // =========================================
-    // PHASE 2: Water rinse (t=1200ms)
-    // 泡で真っ白になった後、水が上から流れて洗い流す
-    // =========================================
-    const waterTimer = setTimeout(() => {
-      // Show water curtain
-      Animated.timing(waterOpacity, {
-        toValue: 1,
-        duration: 200,
-        useNativeDriver: true,
-      }).start();
-
-      // Water sweeps down — 重力で加速する自然な流れ
-      Animated.timing(waterY, {
-        toValue: SH,
-        duration: 1100,
-        easing: Easing.in(Easing.quad),
-        useNativeDriver: true,
-      }).start();
-
-      // Foam dissolves gradually: each bubble fades based on row (top→bottom)
-      // as the water curtain passes over them
-      setTimeout(() => {
-        // Overlay fades out slowly behind the bubbles
-        Animated.timing(foamOverlayOpacity, {
-          toValue: 0,
-          duration: 1000,
-          useNativeDriver: true,
-        }).start();
-
-        // Each bubble pops at a random time — バラバラに消える
-        FOAM_GRID.forEach((f, i) => {
-          const popTimer = setTimeout(() => {
-            Animated.parallel([
-              Animated.timing(foamAnims[i].opacity, {
-                toValue: 0,
-                duration: 250 + Math.random() * 300,
-                useNativeDriver: true,
-              }),
-              // 縮みながら消える
-              Animated.timing(foamAnims[i].scale, {
-                toValue: 0.15 + Math.random() * 0.25,
-                duration: 200 + Math.random() * 200,
-                easing: Easing.in(Easing.quad),
-                useNativeDriver: true,
-              }),
-              // 消える時に少し浮く/沈む（泡の軽さ表現）
-              Animated.timing(foamAnims[i].wobbleX, {
-                toValue: f.popDriftY,
-                duration: 350,
-                easing: Easing.out(Easing.quad),
-                useNativeDriver: true,
-              }),
-            ]).start();
-          }, f.popDelay);
-          timers.push(popTimer);
-        });
-      }, 200);
-
-      // Water drip trails
-      DRIPS.forEach((d, i) => {
-        const dt = setTimeout(() => {
-          Animated.parallel([
-            Animated.timing(dripAnims[i].opacity, {
-              toValue: 0.6,
-              duration: 200,
-              useNativeDriver: true,
-            }),
-            Animated.timing(dripAnims[i].translateY, {
-              toValue: SH * 0.3 + Math.random() * SH * 0.4,
-              duration: d.speed,
-              useNativeDriver: true,
-            }),
-          ]).start(() => {
-            // Drip fades
-            Animated.timing(dripAnims[i].opacity, {
-              toValue: 0,
-              duration: 400,
-              useNativeDriver: true,
-            }).start();
-          });
-        }, d.delay);
-        timers.push(dt);
+    // ============================================
+    // PHASE 2: Road + city motion starts (300ms)
+    // ============================================
+    const roadStart = setTimeout(() => {
+      // Lane dashes stream toward camera
+      laneAnims.forEach((a, i) => {
+        const animateLane = () => {
+          a.setValue(0);
+          Animated.timing(a, {
+            toValue: 1,
+            duration: 850,
+            easing: Easing.in(Easing.quad),
+            useNativeDriver: true,
+          }).start(animateLane);
+        };
+        const t = setTimeout(animateLane, LANES[i].delayOffset);
+        timers.push(t);
       });
 
-      // Water curtain fades out after passing
-      setTimeout(() => {
-        Animated.timing(waterOpacity, {
-          toValue: 0,
-          duration: 400,
-          useNativeDriver: true,
-        }).start();
-      }, 1000);
-    }, 1200);
-    timers.push(waterTimer);
+      // Side neon poles zoom past
+      poleAnims.forEach((a, i) => {
+        const animatePole = () => {
+          a.setValue(0);
+          Animated.timing(a, {
+            toValue: 1,
+            duration: 700,
+            easing: Easing.in(Easing.cubic),
+            useNativeDriver: true,
+          }).start(() => {
+            const t = setTimeout(animatePole, 200 + Math.random() * 600);
+            timers.push(t);
+          });
+        };
+        const t = setTimeout(animatePole, GUARD_POLES[i].delay);
+        timers.push(t);
+      });
 
-    // =========================================
-    // PHASE 3: Logo reveal (t=2600ms)
-    // 泡が消えた後にピカピカのロゴが現れる
-    // =========================================
-    const logoTimer = setTimeout(() => {
+      // Speed streaks
+      streakAnims.forEach((s, i) => {
+        const def = SPEED_STREAKS[i];
+        let count = 0;
+        const animateStreak = () => {
+          if (count >= def.loops) return;
+          count += 1;
+          s.x.setValue(SW + 200);
+          s.opacity.setValue(0);
+          Animated.parallel([
+            Animated.sequence([
+              Animated.timing(s.opacity, { toValue: 0.85, duration: 80, useNativeDriver: true }),
+              Animated.delay(120),
+              Animated.timing(s.opacity, { toValue: 0, duration: 200, useNativeDriver: true }),
+            ]),
+            Animated.timing(s.x, {
+              toValue: -def.width - 200,
+              duration: def.speed,
+              easing: Easing.in(Easing.quad),
+              useNativeDriver: true,
+            }),
+          ]).start(animateStreak);
+        };
+        const t = setTimeout(animateStreak, def.delay);
+        timers.push(t);
+      });
+    }, 300);
+    timers.push(roadStart);
+
+    // ============================================
+    // PHASE 3: Car approaching (700ms - 2400ms)
+    // Tiny glowing dot grows into a roaring car
+    // ============================================
+    const carPhase = setTimeout(() => {
       Animated.parallel([
-        Animated.spring(logoScale, {
+        Animated.timing(carOpacity, {
           toValue: 1,
-          tension: 50,
-          friction: 5,
+          duration: 350,
           useNativeDriver: true,
         }),
-        Animated.timing(logoOpacity, {
+        Animated.timing(carScale, {
           toValue: 1,
-          duration: 500,
+          duration: 1700,
+          easing: Easing.out(Easing.cubic),
           useNativeDriver: true,
         }),
-        Animated.spring(logoRotate, {
-          toValue: 0,
-          tension: 40,
-          friction: 5,
+        Animated.timing(carY, {
+          toValue: 0, // settle near vertical center
+          duration: 1700,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: true,
+        }),
+        Animated.timing(headlightGlow, {
+          toValue: 1,
+          duration: 1700,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: true,
+        }),
+        Animated.timing(underglowOpacity, {
+          toValue: 1,
+          duration: 1500,
+          easing: Easing.out(Easing.cubic),
           useNativeDriver: true,
         }),
       ]).start();
 
-      // Glow pulse
-      const glow = Animated.loop(
-        Animated.parallel([
-          Animated.sequence([
-            Animated.timing(glowOpacity, { toValue: 0.5, duration: 1000, useNativeDriver: true }),
-            Animated.timing(glowOpacity, { toValue: 0.1, duration: 1000, useNativeDriver: true }),
-          ]),
-          Animated.sequence([
-            Animated.timing(glowScale, { toValue: 1.2, duration: 1000, useNativeDriver: true }),
-            Animated.timing(glowScale, { toValue: 0.9, duration: 1000, useNativeDriver: true }),
-          ]),
+      // Subtle car wobble during approach (suspension)
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(carWobble, {
+            toValue: 2,
+            duration: 180,
+            useNativeDriver: true,
+          }),
+          Animated.timing(carWobble, {
+            toValue: -1.5,
+            duration: 180,
+            useNativeDriver: true,
+          }),
         ]),
-      );
-      glow.start();
+        { iterations: 6 },
+      ).start();
+    }, 700);
+    timers.push(carPhase);
 
-      // Cleanup glow on exit
-      const stopGlow = setTimeout(() => glow.stop(), 2000);
-      timers.push(stopGlow);
-    }, 2600);
-    timers.push(logoTimer);
-
-    // ─── Shine sweep (t=3100ms) ───
-    const shineTimer = setTimeout(() => {
+    // ============================================
+    // PHASE 4: Car arrives — brake + flare + shake (2400ms)
+    // ============================================
+    const arrivePhase = setTimeout(() => {
       Animated.sequence([
-        Animated.timing(shineOpacity, { toValue: 0.8, duration: 80, useNativeDriver: true }),
-        Animated.timing(shineX, { toValue: 100, duration: 500, useNativeDriver: true }),
-        Animated.timing(shineOpacity, { toValue: 0, duration: 100, useNativeDriver: true }),
+        Animated.timing(brakeLight, { toValue: 1, duration: 130, useNativeDriver: true }),
+        Animated.timing(brakeLight, { toValue: 0.55, duration: 320, useNativeDriver: true }),
       ]).start();
-    }, 3100);
-    timers.push(shineTimer);
 
-    // =========================================
-    // PHASE 4: Title + tagline (t=3200ms)
-    // =========================================
-    const titleTimer = setTimeout(() => {
+      Animated.sequence([
+        Animated.timing(headlightFlare, { toValue: 1, duration: 180, useNativeDriver: true }),
+        Animated.timing(headlightFlare, { toValue: 0.25, duration: 380, useNativeDriver: true }),
+      ]).start();
+
+      // Camera rumble (skid stop)
+      Animated.sequence([
+        Animated.timing(cameraShakeX, { toValue: 6, duration: 50, useNativeDriver: true }),
+        Animated.timing(cameraShakeX, { toValue: -5, duration: 55, useNativeDriver: true }),
+        Animated.timing(cameraShakeX, { toValue: 4, duration: 50, useNativeDriver: true }),
+        Animated.timing(cameraShakeX, { toValue: -3, duration: 50, useNativeDriver: true }),
+        Animated.timing(cameraShakeX, { toValue: 2, duration: 50, useNativeDriver: true }),
+        Animated.timing(cameraShakeX, { toValue: 0, duration: 60, useNativeDriver: true }),
+      ]).start();
+    }, 2400);
+    timers.push(arrivePhase);
+
+    // ============================================
+    // PHASE 5: Flash → morph to logo (3000ms)
+    // ============================================
+    const flashPhase = setTimeout(() => {
+      Animated.sequence([
+        Animated.timing(flashOpacity, {
+          toValue: 1,
+          duration: 130,
+          easing: Easing.in(Easing.quad),
+          useNativeDriver: true,
+        }),
+        Animated.timing(flashOpacity, {
+          toValue: 0,
+          duration: 480,
+          useNativeDriver: true,
+        }),
+      ]).start();
+
+      // At the peak of the flash, swap car for logo
+      const morph = setTimeout(() => {
+        Animated.parallel([
+          Animated.timing(carOpacity, { toValue: 0, duration: 200, useNativeDriver: true }),
+          Animated.timing(headlightGlow, { toValue: 0, duration: 200, useNativeDriver: true }),
+          Animated.timing(headlightFlare, { toValue: 0, duration: 200, useNativeDriver: true }),
+          Animated.timing(underglowOpacity, { toValue: 0, duration: 200, useNativeDriver: true }),
+          Animated.timing(brakeLight, { toValue: 0, duration: 200, useNativeDriver: true }),
+          Animated.spring(logoScale, {
+            toValue: 1,
+            tension: 60,
+            friction: 7,
+            useNativeDriver: true,
+          }),
+          Animated.timing(logoOpacity, {
+            toValue: 1,
+            duration: 380,
+            useNativeDriver: true,
+          }),
+        ]).start();
+
+        // Logo glow pulse
+        const glowLoop = Animated.loop(
+          Animated.sequence([
+            Animated.timing(logoGlow, { toValue: 0.85, duration: 1100, useNativeDriver: true }),
+            Animated.timing(logoGlow, { toValue: 0.3, duration: 1100, useNativeDriver: true }),
+          ]),
+        );
+        glowLoop.start();
+        loops.push(glowLoop);
+
+        // Ring rotates slowly
+        const rotateLoop = Animated.loop(
+          Animated.timing(ringRotate, {
+            toValue: 1,
+            duration: 9000,
+            easing: Easing.linear,
+            useNativeDriver: true,
+          }),
+        );
+        rotateLoop.start();
+        loops.push(rotateLoop);
+      }, 110);
+      timers.push(morph);
+    }, 3000);
+    timers.push(flashPhase);
+
+    // ============================================
+    // PHASE 6: Title + tagline (3550ms)
+    // ============================================
+    const titlePhase = setTimeout(() => {
       Animated.parallel([
         Animated.spring(titleOpacity, { toValue: 1, tension: 50, friction: 8, useNativeDriver: true }),
         Animated.spring(titleY, { toValue: 0, tension: 50, friction: 8, useNativeDriver: true }),
       ]).start();
-    }, 3200);
-    timers.push(titleTimer);
 
-    const tagTimer = setTimeout(() => {
+      // Cyan glow text behind cycles in/out
+      const glowAltLoop = Animated.loop(
+        Animated.sequence([
+          Animated.timing(titleGlowAlt, { toValue: 1, duration: 1400, useNativeDriver: true }),
+          Animated.timing(titleGlowAlt, { toValue: 0.35, duration: 1400, useNativeDriver: true }),
+        ]),
+      );
+      glowAltLoop.start();
+      loops.push(glowAltLoop);
+    }, 3550);
+    timers.push(titlePhase);
+
+    const tagPhase = setTimeout(() => {
       Animated.parallel([
         Animated.timing(taglineOpacity, { toValue: 1, duration: 400, useNativeDriver: true }),
         Animated.timing(taglineY, { toValue: 0, duration: 400, useNativeDriver: true }),
       ]).start();
-    }, 3500);
-    timers.push(tagTimer);
+    }, 3850);
+    timers.push(tagPhase);
 
-    // ─── Bottom dots (t=3700ms) ───
-    const dotsTimer = setTimeout(() => {
+    const dotsPhase = setTimeout(() => {
       Animated.timing(dotsOpacity, { toValue: 1, duration: 300, useNativeDriver: true }).start();
-    }, 3700);
-    timers.push(dotsTimer);
+    }, 4050);
+    timers.push(dotsPhase);
 
-    // =========================================
-    // PHASE 5: Exit (t=4500ms)
-    // =========================================
-    const exitTimer = setTimeout(() => {
+    // ============================================
+    // PHASE 7: Exit (4900ms)
+    // ============================================
+    const exitPhase = setTimeout(() => {
       Animated.timing(overallFade, {
         toValue: 0,
         duration: 500,
         useNativeDriver: true,
       }).start(() => onFinish());
-    }, 4500);
-    timers.push(exitTimer);
+    }, 4900);
+    timers.push(exitPhase);
 
-    return () => timers.forEach(clearTimeout);
+    return () => {
+      timers.forEach(clearTimeout);
+      loops.forEach((l) => l.stop());
+    };
   }, []);
 
-  const rotateStr = logoRotate.interpolate({
-    inputRange: [-1, 1],
-    outputRange: ['-57.3deg', '57.3deg'],
+  const ringRotateStr = ringRotate.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg'],
   });
 
   return (
     <Animated.View style={[styles.container, { opacity: overallFade }]}>
-      <LinearGradient
-        colors={['#0D1B2A', '#162D4A', Colors.primary, '#162D4A', '#0D1B2A']}
-        start={{ x: 0.2, y: 0 }}
-        end={{ x: 0.8, y: 1 }}
-        style={styles.gradient}
+      <Animated.View
+        style={[
+          styles.scene,
+          {
+            opacity: sceneOpacity,
+            transform: [{ translateX: cameraShakeX }],
+          },
+        ]}
       >
-        {/* ── Background circles ── */}
-        <View style={styles.bgCircle1} />
-        <View style={styles.bgCircle2} />
-
-        {/* ================================================
-            LAYER 1: Foam bubbles (泡スプレー) + white overlay
-            ================================================ */}
-        {/* Solid white overlay — guarantees full white coverage */}
-        <Animated.View
-          style={[styles.foamOverlay, { opacity: foamOverlayOpacity }]}
+        {/* ═══ Sky gradient ═══ */}
+        <LinearGradient
+          colors={['#08010F', '#1A0A35', '#3D0F5C', '#5C0E4D', '#1F0832']}
+          locations={[0, 0.28, 0.5, 0.72, 1]}
+          start={{ x: 0.5, y: 0 }}
+          end={{ x: 0.5, y: 1 }}
+          style={StyleSheet.absoluteFill}
         />
 
-        <View style={styles.foamLayer}>
-          {FOAM_GRID.map((f, i) => (
-            <Animated.View
-              key={f.id}
-              style={[
-                styles.foamBubble,
-                {
-                  width: f.size,
-                  height: f.size,
-                  borderRadius: f.size / 2,
-                  left: f.startX,
-                  top: f.startY,
-                  opacity: foamAnims[i].opacity,
-                  transform: [
-                    { translateX: Animated.add(foamAnims[i].translateX, foamAnims[i].wobbleX) },
-                    { translateY: foamAnims[i].translateY },
-                    { scale: foamAnims[i].scale },
-                  ],
-                },
-              ]}
-            >
-              {/* Inner highlight for 3D bubble look */}
-              <View
-                style={[
-                  styles.foamHighlight,
-                  {
-                    width: f.size * 0.35,
-                    height: f.size * 0.35,
-                    borderRadius: f.size * 0.175,
-                  },
-                ]}
-              />
-            </Animated.View>
-          ))}
+        {/* Distant horizon glow (sunset/skyline haze) */}
+        <View style={styles.horizonGlow}>
+          <LinearGradient
+            colors={['transparent', 'rgba(255, 46, 196, 0.18)', 'rgba(0, 240, 255, 0.10)', 'transparent']}
+            start={{ x: 0, y: 0.5 }}
+            end={{ x: 1, y: 0.5 }}
+            style={StyleSheet.absoluteFill}
+          />
         </View>
 
-        {/* ================================================
-            LAYER 2: Water rinse curtain (水流)
-            ================================================ */}
-        <Animated.View
-          style={[
-            styles.waterCurtain,
-            {
-              opacity: waterOpacity,
-              transform: [{ translateY: waterY }],
-            },
-          ]}
-        >
-          <LinearGradient
-            colors={[
-              'rgba(59,130,246,0.01)',
-              'rgba(59,130,246,0.12)',
-              'rgba(96,165,250,0.25)',
-              'rgba(147,197,253,0.18)',
-              'rgba(59,130,246,0.08)',
-              'rgba(59,130,246,0.01)',
-            ]}
-            style={styles.waterGradient}
-          />
-        </Animated.View>
-
-        {/* ── Water drip trails ── */}
-        {DRIPS.map((d, i) => (
+        {/* ═══ Stars ═══ */}
+        {STARS.map((s, i) => (
           <Animated.View
-            key={`drip-${d.id}`}
+            key={`star-${s.id}`}
             style={[
-              styles.drip,
+              styles.star,
               {
-                left: d.x,
-                width: d.size,
-                height: d.size * 3,
-                borderRadius: d.size,
-                opacity: dripAnims[i].opacity,
-                transform: [{ translateY: dripAnims[i].translateY }],
+                left: s.x,
+                top: s.y,
+                width: s.size,
+                height: s.size,
+                borderRadius: s.size / 2,
+                opacity: starAnims[i],
               },
             ]}
           />
         ))}
 
-        {/* ================================================
-            LAYER 3: Logo + Text (ロゴ表示)
-            ================================================ */}
-        <View style={styles.centerContent}>
-          {/* Logo */}
-          <Animated.View
-            style={[
-              styles.logoWrap,
-              {
-                opacity: logoOpacity,
-                transform: [
-                  { scale: logoScale },
-                  { rotate: rotateStr },
-                ],
-              },
-            ]}
-          >
-            {/* Glow */}
-            <Animated.View
+        {/* ═══ City silhouette ═══ */}
+        <View style={styles.cityRow}>
+          {BUILDINGS.map((b) => (
+            <View
+              key={`bldg-${b.id}`}
               style={[
-                styles.glow,
-                { opacity: glowOpacity, transform: [{ scale: glowScale }] },
+                styles.building,
+                {
+                  left: b.x,
+                  width: b.w,
+                  height: b.h,
+                  bottom: SH - HORIZON_Y - 4,
+                },
               ]}
-            />
-
-            {/* Ring */}
-            <View style={styles.logoRing}>
-              <View style={styles.logoInner}>
-                <MaterialCommunityIcons name="car-wash" size={56} color={Colors.white} />
-              </View>
+            >
+              {/* Neon top edge */}
+              <View
+                style={[
+                  styles.buildingTop,
+                  { backgroundColor: b.neonColor, shadowColor: b.neonColor },
+                ]}
+              />
+              {/* Side neon stripe */}
+              <View
+                style={[
+                  styles.buildingStripe,
+                  { backgroundColor: b.neonColor, shadowColor: b.neonColor },
+                ]}
+              />
+              {/* Lit windows */}
+              {b.windows.map((w, j) =>
+                w.lit ? (
+                  <View
+                    key={j}
+                    style={[
+                      styles.buildingWindow,
+                      {
+                        bottom: 8 + j * 14,
+                        backgroundColor: w.warm ? '#FFC542' : '#FFE7AA',
+                      },
+                    ]}
+                  />
+                ) : null,
+              )}
             </View>
-
-            {/* Shine */}
-            <Animated.View
-              style={[
-                styles.shine,
-                { opacity: shineOpacity, transform: [{ translateX: shineX }] },
-              ]}
-            />
-
-            {/* Sparkle decorations */}
-            <Ionicons name="sparkles" size={14} color="rgba(96,165,250,0.7)" style={styles.sparkle1} />
-            <Ionicons name="sparkles" size={10} color="rgba(191,219,254,0.5)" style={styles.sparkle2} />
-            <Ionicons name="water" size={11} color="rgba(147,197,253,0.5)" style={styles.sparkle3} />
-          </Animated.View>
-
-          {/* Title */}
-          <Animated.View
-            style={{ opacity: titleOpacity, transform: [{ translateY: titleY }] }}
-          >
-            <Text style={styles.title}>Mobile Wash</Text>
-          </Animated.View>
-
-          {/* Tagline */}
-          <Animated.View
-            style={{ opacity: taglineOpacity, transform: [{ translateY: taglineY }] }}
-          >
-            <Text style={styles.tagline}>出張カーディテイリング</Text>
-            <View style={styles.taglineLine} />
-          </Animated.View>
+          ))}
         </View>
 
-        {/* ── Bottom dots ── */}
+        {/* ═══ Road surface (asphalt gradient) ═══ */}
+        <View style={styles.road}>
+          <LinearGradient
+            colors={['rgba(40, 12, 60, 0.55)', 'rgba(8, 1, 15, 0.95)', '#000000']}
+            locations={[0, 0.5, 1]}
+            style={StyleSheet.absoluteFill}
+          />
+
+          {/* Perspective road edges (left/right) */}
+          <View style={styles.roadEdgeLeft} />
+          <View style={styles.roadEdgeRight} />
+
+          {/* Magenta/cyan rim glow on road edges */}
+          <View style={styles.roadEdgeGlowLeft} />
+          <View style={styles.roadEdgeGlowRight} />
+        </View>
+
+        {/* ═══ Lane center dashes (animated, perspective) ═══ */}
+        {LANES.map((lane, i) => {
+          const dashY = laneAnims[i].interpolate({
+            inputRange: [0, 1],
+            outputRange: [0, SH * 0.5],
+          });
+          const dashScale = laneAnims[i].interpolate({
+            inputRange: [0, 1],
+            outputRange: [0.15, 5.5],
+          });
+          const dashOpacity = laneAnims[i].interpolate({
+            inputRange: [0, 0.08, 0.85, 1],
+            outputRange: [0, 1, 1, 0],
+          });
+          return (
+            <Animated.View
+              key={`lane-${lane.id}`}
+              style={[
+                styles.laneDash,
+                {
+                  opacity: dashOpacity,
+                  transform: [{ translateY: dashY }, { scale: dashScale }],
+                },
+              ]}
+            />
+          );
+        })}
+
+        {/* ═══ Side neon poles whooshing past ═══ */}
+        {GUARD_POLES.map((pole, i) => {
+          const isLeft = pole.side === 'left';
+          const startX = isLeft ? SW * 0.45 : SW * 0.55;
+          const endX = isLeft ? -50 : SW + 50;
+          const startY = HORIZON_Y;
+          const endY = SH - 40;
+          const tx = poleAnims[i].interpolate({
+            inputRange: [0, 1],
+            outputRange: [startX, endX],
+          });
+          const ty = poleAnims[i].interpolate({
+            inputRange: [0, 1],
+            outputRange: [startY, endY],
+          });
+          const ps = poleAnims[i].interpolate({
+            inputRange: [0, 1],
+            outputRange: [0.1, 4],
+          });
+          const po = poleAnims[i].interpolate({
+            inputRange: [0, 0.15, 0.85, 1],
+            outputRange: [0, 1, 1, 0],
+          });
+          return (
+            <Animated.View
+              key={`pole-${pole.id}`}
+              style={[
+                styles.neonPole,
+                {
+                  backgroundColor: i % 2 === 0 ? NEON.cyan : NEON.magenta,
+                  shadowColor: i % 2 === 0 ? NEON.cyan : NEON.magenta,
+                  opacity: po,
+                  transform: [
+                    { translateX: tx },
+                    { translateY: ty },
+                    { scale: ps },
+                  ],
+                },
+              ]}
+            />
+          );
+        })}
+
+        {/* ═══ Speed streaks ═══ */}
+        {SPEED_STREAKS.map((s, i) => (
+          <Animated.View
+            key={`streak-${s.id}`}
+            style={[
+              styles.speedStreak,
+              {
+                top: s.y,
+                width: s.width,
+                backgroundColor: s.color,
+                shadowColor: s.color,
+                opacity: streakAnims[i].opacity,
+                transform: [{ translateX: streakAnims[i].x }],
+              },
+            ]}
+          />
+        ))}
+
+        {/* ═══ CAR (the hero) ═══ */}
+        <Animated.View
+          style={[
+            styles.carContainer,
+            {
+              opacity: carOpacity,
+              transform: [
+                { translateY: Animated.add(carY, carWobble) },
+                { scale: carScale },
+              ],
+            },
+          ]}
+        >
+          {/* Headlight beams (cone) */}
+          <Animated.View
+            style={[styles.beamWrap, { opacity: headlightGlow }]}
+            pointerEvents="none"
+          >
+            <View style={[styles.beam, styles.beamLeft]}>
+              <LinearGradient
+                colors={[
+                  'rgba(220, 240, 255, 0.7)',
+                  'rgba(220, 240, 255, 0.18)',
+                  'rgba(220, 240, 255, 0)',
+                ]}
+                style={StyleSheet.absoluteFill}
+              />
+            </View>
+            <View style={[styles.beam, styles.beamRight]}>
+              <LinearGradient
+                colors={[
+                  'rgba(220, 240, 255, 0.7)',
+                  'rgba(220, 240, 255, 0.18)',
+                  'rgba(220, 240, 255, 0)',
+                ]}
+                style={StyleSheet.absoluteFill}
+              />
+            </View>
+          </Animated.View>
+
+          {/* Underglow neon (cyan + magenta) */}
+          <Animated.View
+            style={[styles.underglow, { opacity: underglowOpacity }]}
+            pointerEvents="none"
+          >
+            <LinearGradient
+              colors={['rgba(255, 46, 196, 0.0)', 'rgba(255, 46, 196, 0.55)', 'rgba(0, 240, 255, 0.55)', 'rgba(0, 240, 255, 0.0)']}
+              start={{ x: 0, y: 0.5 }}
+              end={{ x: 1, y: 0.5 }}
+              style={StyleSheet.absoluteFill}
+            />
+          </Animated.View>
+
+          {/* Car silhouette */}
+          <View style={styles.carBody}>
+            <MaterialCommunityIcons name="car-sports" size={140} color="#070716" />
+          </View>
+
+          {/* Bright headlight pinpoints */}
+          <Animated.View
+            style={[styles.headlightDot, styles.headlightLeft, { opacity: headlightGlow }]}
+          />
+          <Animated.View
+            style={[styles.headlightDot, styles.headlightRight, { opacity: headlightGlow }]}
+          />
+
+          {/* Lens flare (large soft bloom on arrival) */}
+          <Animated.View
+            style={[styles.lensFlare, { opacity: headlightFlare }]}
+            pointerEvents="none"
+          />
+
+          {/* Brake light glow */}
+          <Animated.View
+            style={[styles.brakeGlow, { opacity: brakeLight }]}
+            pointerEvents="none"
+          />
+        </Animated.View>
+
+        {/* ═══ Flash burst (car → logo) ═══ */}
+        <Animated.View
+          style={[styles.flashBurst, { opacity: flashOpacity }]}
+          pointerEvents="none"
+        />
+
+        {/* ═══ LOGO ═══ */}
+        <Animated.View
+          style={[
+            styles.logoWrap,
+            {
+              opacity: logoOpacity,
+              transform: [{ scale: logoScale }],
+            },
+          ]}
+        >
+          {/* Outer glow */}
+          <Animated.View
+            style={[styles.logoOuterGlow, { opacity: logoGlow }]}
+            pointerEvents="none"
+          />
+          {/* Magenta rotating ring */}
+          <Animated.View
+            style={[
+              styles.ringRotating,
+              { transform: [{ rotate: ringRotateStr }] },
+            ]}
+          />
+          {/* Inner orb */}
+          <View style={styles.logoOrb}>
+            <View style={styles.logoOrbInner}>
+              <MaterialCommunityIcons name="car-wash" size={56} color={Colors.white} />
+            </View>
+          </View>
+          {/* Sparkles */}
+          <Ionicons name="sparkles" size={14} color={NEON.cyan} style={styles.sparkle1} />
+          <Ionicons name="sparkles" size={10} color={NEON.magenta} style={styles.sparkle2} />
+          <Ionicons name="water" size={11} color={NEON.cyan} style={styles.sparkle3} />
+        </Animated.View>
+
+        {/* ═══ Title (with cyan glow ghost) ═══ */}
+        <Animated.View
+          style={[
+            styles.titleWrap,
+            { opacity: titleOpacity, transform: [{ translateY: titleY }] },
+          ]}
+        >
+          {/* Cyan glow underlayer */}
+          <Animated.Text
+            style={[styles.titleGhost, { opacity: titleGlowAlt }]}
+            numberOfLines={1}
+          >
+            Mobile Wash
+          </Animated.Text>
+          {/* Magenta offset (chromatic aberration vibe) */}
+          <Text style={[styles.titleAberration, styles.titleAberrationMagenta]}>
+            Mobile Wash
+          </Text>
+          <Text style={[styles.titleAberration, styles.titleAberrationCyan]}>
+            Mobile Wash
+          </Text>
+          {/* Main title */}
+          <Text style={styles.title}>Mobile Wash</Text>
+        </Animated.View>
+
+        {/* ═══ Tagline ═══ */}
+        <Animated.View
+          style={[
+            styles.taglineWrap,
+            { opacity: taglineOpacity, transform: [{ translateY: taglineY }] },
+          ]}
+        >
+          <View style={styles.taglineDecorRow}>
+            <View style={styles.taglineLine} />
+            <Text style={styles.tagline}>YOUR CITY · YOUR SHINE</Text>
+            <View style={styles.taglineLine} />
+          </View>
+        </Animated.View>
+
+        {/* ═══ Bottom dots ═══ */}
         <Animated.View style={[styles.bottomDots, { opacity: dotsOpacity }]}>
           <View style={[styles.dot, styles.dotActive]} />
           <View style={styles.dot} />
           <View style={styles.dot} />
         </Animated.View>
-      </LinearGradient>
+      </Animated.View>
     </Animated.View>
   );
 }
@@ -570,180 +846,428 @@ const styles = StyleSheet.create({
   container: {
     ...StyleSheet.absoluteFillObject,
     zIndex: 100,
+    backgroundColor: '#08010F',
   },
-  gradient: {
+  scene: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
     overflow: 'hidden',
   },
 
-  // ── Background ──
-  bgCircle1: {
+  // ── Sky elements ──
+  horizonGlow: {
     position: 'absolute',
-    top: -SH * 0.12,
-    right: -SW * 0.15,
-    width: SW * 0.6,
-    height: SW * 0.6,
-    borderRadius: SW * 0.3,
-    backgroundColor: 'rgba(59,130,246,0.04)',
+    top: HORIZON_Y - 60,
+    left: 0,
+    right: 0,
+    height: 100,
   },
-  bgCircle2: {
+  star: {
     position: 'absolute',
-    bottom: -SH * 0.08,
-    left: -SW * 0.2,
-    width: SW * 0.5,
-    height: SW * 0.5,
-    borderRadius: SW * 0.25,
-    backgroundColor: 'rgba(59,130,246,0.03)',
-  },
-
-  // ── Foam solid overlay (guarantees full white) ──
-  foamOverlay: {
-    ...StyleSheet.absoluteFillObject,
     backgroundColor: '#FFFFFF',
-    zIndex: 9,
-  },
-
-  // ── Foam layer ──
-  foamLayer: {
-    ...StyleSheet.absoluteFillObject,
-    zIndex: 10,
-  },
-  foamBubble: {
-    position: 'absolute',
-    backgroundColor: 'rgba(255,255,255,0.92)',
-    borderWidth: 0.5,
-    borderColor: 'rgba(230,240,255,0.6)',
-    shadowColor: '#fff',
+    shadowColor: '#FFFFFF',
     shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.5,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  foamHighlight: {
-    position: 'absolute',
-    top: '12%' as any,
-    left: '15%' as any,
-    backgroundColor: 'rgba(255,255,255,1)',
+    shadowOpacity: 0.9,
+    shadowRadius: 4,
   },
 
-  // ── Water curtain ──
-  waterCurtain: {
+  // ── City silhouette ──
+  cityRow: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: SH * 0.5 + 200,
+  },
+  building: {
+    position: 'absolute',
+    backgroundColor: '#06010C',
+    borderTopLeftRadius: 2,
+    borderTopRightRadius: 2,
+  },
+  buildingTop: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
-    height: SH * 0.6,
-    zIndex: 20,
+    height: 1.5,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 1,
+    shadowRadius: 5,
   },
-  waterGradient: {
-    flex: 1,
-  },
-
-  // ── Drip trails ──
-  drip: {
+  buildingStripe: {
     position: 'absolute',
-    top: SH * 0.1,
-    backgroundColor: 'rgba(147,197,253,0.35)',
-    zIndex: 15,
+    top: 6,
+    bottom: 6,
+    width: 1,
+    left: 4,
+    opacity: 0.55,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 1,
+    shadowRadius: 4,
+  },
+  buildingWindow: {
+    position: 'absolute',
+    width: 3,
+    height: 3,
+    left: '50%' as any,
+    marginLeft: -1.5,
+    borderRadius: 0.5,
+    opacity: 0.85,
   },
 
-  // ── Center content (logo + text) ──
-  centerContent: {
-    alignItems: 'center',
-    zIndex: 5,
+  // ── Road ──
+  road: {
+    position: 'absolute',
+    top: HORIZON_Y,
+    left: 0,
+    right: 0,
+    height: SH - HORIZON_Y,
+    overflow: 'hidden',
   },
-  logoWrap: {
-    marginBottom: 36,
+  roadEdgeLeft: {
+    position: 'absolute',
+    left: 0,
+    bottom: 0,
+    width: 0,
+    height: 0,
+    borderLeftWidth: SW * 0.45,
+    borderBottomWidth: SH - HORIZON_Y,
+    borderLeftColor: 'rgba(40, 12, 60, 0.4)',
+    borderBottomColor: 'transparent',
+  },
+  roadEdgeRight: {
+    position: 'absolute',
+    right: 0,
+    bottom: 0,
+    width: 0,
+    height: 0,
+    borderRightWidth: SW * 0.45,
+    borderBottomWidth: SH - HORIZON_Y,
+    borderRightColor: 'rgba(40, 12, 60, 0.4)',
+    borderBottomColor: 'transparent',
+  },
+  roadEdgeGlowLeft: {
+    position: 'absolute',
+    left: SW * 0.05,
+    top: 0,
+    width: 1.5,
+    height: SH - HORIZON_Y,
+    backgroundColor: NEON.magenta,
+    opacity: 0.55,
+    transform: [{ skewX: '-32deg' }],
+    shadowColor: NEON.magenta,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 1,
+    shadowRadius: 8,
+  },
+  roadEdgeGlowRight: {
+    position: 'absolute',
+    right: SW * 0.05,
+    top: 0,
+    width: 1.5,
+    height: SH - HORIZON_Y,
+    backgroundColor: NEON.cyan,
+    opacity: 0.55,
+    transform: [{ skewX: '32deg' }],
+    shadowColor: NEON.cyan,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 1,
+    shadowRadius: 8,
+  },
+
+  // ── Lane center dash ──
+  laneDash: {
+    position: 'absolute',
+    top: HORIZON_Y - 4,
+    left: SW / 2 - 8,
+    width: 16,
+    height: 8,
+    backgroundColor: '#FFD64A',
+    borderRadius: 2,
+    shadowColor: '#FFD64A',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.9,
+    shadowRadius: 6,
+  },
+
+  // ── Side neon poles ──
+  neonPole: {
+    position: 'absolute',
+    width: 3,
+    height: 18,
+    borderRadius: 1.5,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 1,
+    shadowRadius: 8,
+  },
+
+  // ── Speed streaks ──
+  speedStreak: {
+    position: 'absolute',
+    height: 2,
+    borderRadius: 1,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 1,
+    shadowRadius: 10,
+  },
+
+  // ── Car ──
+  carContainer: {
+    position: 'absolute',
+    top: SH * 0.5 - 70,
+    left: SW / 2 - 70,
     width: 140,
     height: 140,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  glow: {
+  beamWrap: {
     position: 'absolute',
-    width: 170,
-    height: 170,
-    borderRadius: 85,
-    backgroundColor: 'rgba(59,130,246,0.15)',
+    top: 70,
+    left: -90,
+    right: -90,
+    height: 240,
   },
-  logoRing: {
-    width: 130,
-    height: 130,
-    borderRadius: 65,
-    borderWidth: 2,
-    borderColor: 'rgba(96,165,250,0.35)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  logoInner: {
-    width: 110,
-    height: 110,
-    borderRadius: 55,
-    backgroundColor: 'rgba(59,130,246,0.18)',
-    borderWidth: 1,
-    borderColor: 'rgba(96,165,250,0.25)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  shine: {
+  beam: {
     position: 'absolute',
-    width: 35,
+    top: 0,
+    height: 240,
+    overflow: 'hidden',
+  },
+  beamLeft: {
+    left: 70,
+    width: 70,
+    transform: [{ skewX: '-25deg' }],
+  },
+  beamRight: {
+    right: 70,
+    width: 70,
+    transform: [{ skewX: '25deg' }],
+  },
+  underglow: {
+    position: 'absolute',
+    bottom: 18,
+    width: 160,
+    height: 26,
+    borderRadius: 80,
+    overflow: 'hidden',
+  },
+  carBody: {
+    zIndex: 2,
+  },
+  headlightDot: {
+    position: 'absolute',
+    width: 13,
+    height: 13,
+    borderRadius: 6.5,
+    backgroundColor: '#FFFFFF',
+    top: 84,
+    shadowColor: '#FFFFFF',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 1,
+    shadowRadius: 14,
+    zIndex: 3,
+  },
+  headlightLeft: { left: 30 },
+  headlightRight: { right: 30 },
+  lensFlare: {
+    position: 'absolute',
+    width: 280,
+    height: 280,
+    borderRadius: 140,
+    backgroundColor: 'rgba(220, 240, 255, 0.45)',
+    shadowColor: '#FFFFFF',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 1,
+    shadowRadius: 40,
+    top: 10,
+  },
+  brakeGlow: {
+    position: 'absolute',
+    bottom: 32,
+    width: 120,
+    height: 16,
+    borderRadius: 60,
+    backgroundColor: NEON.hotPink,
+    shadowColor: NEON.hotPink,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 1,
+    shadowRadius: 25,
+  },
+
+  // ── Flash burst ──
+  flashBurst: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: '#FFFFFF',
+    zIndex: 50,
+  },
+
+  // ── Logo ──
+  logoWrap: {
+    position: 'absolute',
+    top: SH * 0.5 - 70,
+    left: SW / 2 - 70,
+    width: 140,
     height: 140,
-    backgroundColor: 'rgba(255,255,255,0.12)',
-    borderRadius: 17,
-    transform: [{ skewX: '-15deg' }],
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 60,
   },
-  sparkle1: { position: 'absolute', top: 0, right: 0 },
-  sparkle2: { position: 'absolute', bottom: 6, left: -2 },
-  sparkle3: { position: 'absolute', top: 20, left: -6 },
+  logoOuterGlow: {
+    position: 'absolute',
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    backgroundColor: NEON.cyan,
+    opacity: 0.15,
+    shadowColor: NEON.cyan,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 1,
+    shadowRadius: 30,
+  },
+  ringRotating: {
+    position: 'absolute',
+    width: 134,
+    height: 134,
+    borderRadius: 67,
+    borderWidth: 1.5,
+    borderColor: NEON.magenta,
+    shadowColor: NEON.magenta,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 12,
+  },
+  logoOrb: {
+    width: 116,
+    height: 116,
+    borderRadius: 58,
+    borderWidth: 1.5,
+    borderColor: 'rgba(0, 240, 255, 0.6)',
+    backgroundColor: 'rgba(15, 8, 35, 0.85)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: NEON.cyan,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 1,
+    shadowRadius: 18,
+  },
+  logoOrbInner: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: 'rgba(30, 58, 95, 0.6)',
+    borderWidth: 1,
+    borderColor: 'rgba(0, 240, 255, 0.35)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  sparkle1: { position: 'absolute', top: -4, right: -4 },
+  sparkle2: { position: 'absolute', bottom: 0, left: -2 },
+  sparkle3: { position: 'absolute', top: 24, left: -8 },
 
   // ── Title ──
+  titleWrap: {
+    position: 'absolute',
+    top: SH * 0.5 + 90,
+    width: SW,
+    alignItems: 'center',
+    zIndex: 70,
+  },
   title: {
-    fontSize: 38,
+    fontSize: 40,
     fontWeight: '800',
-    color: Colors.white,
-    letterSpacing: 2,
+    color: '#FFFFFF',
+    letterSpacing: 3,
     textAlign: 'center',
-    marginBottom: 12,
-    textShadowColor: 'rgba(59,130,246,0.5)',
-    textShadowOffset: { width: 0, height: 2 },
+    textShadowColor: NEON.cyan,
+    textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 10,
     ...Platform.select({ ios: { fontFamily: 'System' } }),
   },
-  tagline: {
-    fontSize: FontSize.md,
-    color: 'rgba(191,219,254,0.9)',
-    letterSpacing: 4,
+  titleGhost: {
+    position: 'absolute',
+    fontSize: 40,
+    fontWeight: '800',
+    color: 'transparent',
+    letterSpacing: 3,
     textAlign: 'center',
-    fontWeight: '300',
+    textShadowColor: NEON.cyan,
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 22,
+  },
+  titleAberration: {
+    position: 'absolute',
+    fontSize: 40,
+    fontWeight: '800',
+    letterSpacing: 3,
+    textAlign: 'center',
+    width: SW,
+  },
+  titleAberrationMagenta: {
+    color: 'rgba(255, 46, 196, 0.55)',
+    transform: [{ translateX: -2 }],
+  },
+  titleAberrationCyan: {
+    color: 'rgba(0, 240, 255, 0.55)',
+    transform: [{ translateX: 2 }],
+  },
+
+  // ── Tagline ──
+  taglineWrap: {
+    position: 'absolute',
+    top: SH * 0.5 + 152,
+    width: SW,
+    alignItems: 'center',
+    zIndex: 70,
+  },
+  taglineDecorRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
   },
   taglineLine: {
-    marginTop: 12,
-    width: 50,
-    height: 2,
-    borderRadius: 1,
-    backgroundColor: 'rgba(96,165,250,0.35)',
-    alignSelf: 'center',
+    width: 24,
+    height: 1.5,
+    backgroundColor: NEON.cyan,
+    shadowColor: NEON.cyan,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 1,
+    shadowRadius: 4,
+  },
+  tagline: {
+    fontSize: FontSize.xs,
+    color: NEON.cyan,
+    letterSpacing: 5,
+    fontWeight: '600',
+    textShadowColor: NEON.cyan,
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 4,
   },
 
   // ── Bottom dots ──
   bottomDots: {
     position: 'absolute',
     bottom: 70,
+    left: 0,
+    right: 0,
     flexDirection: 'row',
+    justifyContent: 'center',
     gap: 8,
+    zIndex: 70,
   },
   dot: {
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: 'rgba(96,165,250,0.2)',
+    backgroundColor: 'rgba(0, 240, 255, 0.25)',
   },
   dotActive: {
-    backgroundColor: 'rgba(96,165,250,0.7)',
+    backgroundColor: NEON.cyan,
     width: 18,
     borderRadius: 3,
+    shadowColor: NEON.cyan,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 1,
+    shadowRadius: 6,
   },
 });
