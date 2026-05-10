@@ -58,6 +58,8 @@ export default function ProLayout() {
           ),
         }}
       />
+      {/* Hidden screens (accessible via router.push, not shown in tab bar) */}
+      <Tabs.Screen name="boost" options={{ href: null }} />
     </Tabs>
   );
 }

@@ -59,6 +59,7 @@ export default function CustomerLayout() {
         }}
       />
       {/* Hidden screens (accessible via router.push, not shown in tab bar) */}
+      <Tabs.Screen name="booking" options={{ href: null }} />
       <Tabs.Screen name="gift" options={{ href: null }} />
       <Tabs.Screen name="subscription" options={{ href: null }} />
       <Tabs.Screen name="quality-audit" options={{ href: null }} />
