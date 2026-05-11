@@ -9,7 +9,7 @@ export default function FAQ() {
     >
       <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-10">
         <div className="grid lg:grid-cols-12 gap-10">
-          <div className="lg:col-span-4">
+          <div className="lg:col-span-4" data-reveal>
             <p className="section-label mb-4 inline-flex">FAQ</p>
             <h2
               id="faq-heading"

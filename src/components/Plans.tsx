@@ -57,7 +57,7 @@ export default function Plans() {
       className="py-20 sm:py-28 bg-[#f7fbff]"
     >
       <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-10">
-        <div className="text-center max-w-2xl mx-auto mb-14">
+        <div className="text-center max-w-2xl mx-auto mb-14" data-reveal>
           <p className="section-label mb-4 inline-flex">Plans</p>
           <h2
             id="plans-heading"

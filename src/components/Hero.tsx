@@ -18,19 +18,23 @@ export default async function Hero() {
       <div className="relative max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-10">
         <div className="grid lg:grid-cols-12 gap-10 lg:gap-12 items-center">
           <div className="lg:col-span-6">
-            <span className="tag-pill mb-6">
-              <span className="w-1.5 h-1.5 bg-[#0099e6] rounded-full" />
+            <span className="tag-pill mb-6 relative" data-reveal>
+              <span className="relative inline-flex w-1.5 h-1.5">
+                <span className="absolute inset-0 bg-[#0099e6] rounded-full opacity-70 animate-ping" />
+                <span className="relative w-1.5 h-1.5 bg-[#0099e6] rounded-full" />
+              </span>
               出張洗車アプリ / {stats.launchTarget} 正式ローンチ予定
             </span>
             <h1
               id="hero-heading"
               className="heading-tight text-[40px] sm:text-5xl lg:text-[58px] xl:text-[64px] font-bold text-[#0a2540] mb-6"
+              data-reveal
             >
               <span className="text-[#0099e6]">出張洗車</span>を、
               <br />
               呼ぶ時代へ。
             </h1>
-            <p className="text-[15px] sm:text-base lg:text-lg text-[#5a7090] leading-relaxed mb-10 max-w-xl">
+            <p className="text-[15px] sm:text-base lg:text-lg text-[#5a7090] leading-relaxed mb-10 max-w-xl" data-reveal>
               MobileWash は、<strong className="text-[#0a2540] font-bold">出張洗車・出張コーティング</strong>
               のプロをスマホひとつで呼べるカーディテイリングアプリ。
               GPSで近くの認定プロを自動マッチングし、ご自宅やマンションの駐車場へ
@@ -84,12 +88,13 @@ export default async function Hero() {
             </dl>
           </div>
 
-          <div className="lg:col-span-6 flex justify-center lg:justify-end">
+          <div className="lg:col-span-6 flex justify-center lg:justify-end" data-reveal>
             <div className="relative">
               <div className="absolute -top-8 -left-10 bg-white soft-shadow-lg rounded-2xl px-4 py-3 z-20 hidden sm:block">
                 <div className="flex items-center gap-2">
-                  <div className="w-9 h-9 bg-[#e6f4ff] rounded-full flex items-center justify-center">
-                    <svg className="w-5 h-5 text-[#0099e6]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                  <div className="w-9 h-9 bg-[#e6f4ff] rounded-full flex items-center justify-center relative">
+                    <span className="pulse-ring text-[#0099e6]" aria-hidden="true" />
+                    <svg className="w-5 h-5 text-[#0099e6] relative" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                       <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
@@ -127,6 +132,59 @@ export default async function Hero() {
                       <br />
                       <span className="text-[#0099e6]">ピカピカ</span>に。
                     </p>
+
+                    <div className="mt-3 relative h-16 rounded-xl bg-[#f0f9ff] border border-[#e4eef7] overflow-hidden">
+                      <svg
+                        viewBox="0 0 240 64"
+                        className="absolute inset-0 w-full h-full"
+                        aria-hidden="true"
+                      >
+                        <defs>
+                          <linearGradient id="hero-route" x1="0" x2="1" y1="0" y2="0">
+                            <stop offset="0%" stopColor="#00b4ff" stopOpacity="0.2" />
+                            <stop offset="100%" stopColor="#0099e6" stopOpacity="1" />
+                          </linearGradient>
+                        </defs>
+                        <g stroke="#cfdfee" strokeWidth="0.6">
+                          <path d="M0 18 L240 18" />
+                          <path d="M0 36 L240 36" />
+                          <path d="M0 54 L240 54" />
+                          <path d="M60 0 L60 64" />
+                          <path d="M140 0 L140 64" />
+                          <path d="M200 0 L200 64" />
+                        </g>
+                        <path
+                          d="M20 50 Q 80 50 110 36 T 200 22"
+                          stroke="url(#hero-route)"
+                          strokeWidth="2.5"
+                          fill="none"
+                          strokeLinecap="round"
+                          strokeDasharray="4 4"
+                        >
+                          <animate
+                            attributeName="stroke-dashoffset"
+                            from="0"
+                            to="-16"
+                            dur="1.4s"
+                            repeatCount="indefinite"
+                          />
+                        </path>
+                        <circle cx="20" cy="50" r="3" fill="#00d4b8" />
+                        <g>
+                          <circle cx="200" cy="22" r="3.5" fill="#0099e6" />
+                          <circle cx="200" cy="22" r="3.5" fill="#0099e6" opacity="0.35">
+                            <animate attributeName="r" from="3.5" to="9" dur="1.6s" repeatCount="indefinite" />
+                            <animate attributeName="opacity" from="0.45" to="0" dur="1.6s" repeatCount="indefinite" />
+                          </circle>
+                        </g>
+                      </svg>
+                      <div className="absolute top-1.5 left-2 text-[8px] font-bold text-[#0099e6] tracking-widest">
+                        LIVE GPS
+                      </div>
+                      <div className="absolute bottom-1 right-2 text-[8px] font-bold text-[#0a2540]">
+                        到着まで <span className="text-[#0099e6]">約5分</span>
+                      </div>
+                    </div>
                   </div>
 
                   <div className="px-3">

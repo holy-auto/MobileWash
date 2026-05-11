@@ -65,7 +65,7 @@ export default function Services() {
       className="py-20 sm:py-28 bg-white"
     >
       <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-10">
-        <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 mb-12">
+        <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 mb-12" data-reveal>
           <div>
             <p className="section-label mb-4 inline-flex">Services</p>
             <h2

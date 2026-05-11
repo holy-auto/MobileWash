@@ -1,14 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const mainNav = [
-  { href: "/#services", label: "サービス" },
-  { href: "/#plans", label: "料金プラン" },
-  { href: "/#how-it-works", label: "ご利用の流れ" },
-  { href: "/areas", label: "対応エリア" },
-  { href: "/guide/mobile-wash", label: "出張洗車ガイド" },
-  { href: "/#faq", label: "よくある質問" },
+  { href: "/#services", label: "サービス", section: "services" },
+  { href: "/#plans", label: "料金プラン", section: "plans" },
+  { href: "/#how-it-works", label: "ご利用の流れ", section: "how-it-works" },
+  { href: "/areas", label: "対応エリア", section: null },
+  { href: "/guide/mobile-wash", label: "出張洗車ガイド", section: null },
+  { href: "/#faq", label: "よくある質問", section: "faq" },
 ];
 
 const utilityNav = [
@@ -17,11 +17,71 @@ const utilityNav = [
   { href: "#pro-recruit", label: "プロ募集" },
 ];
 
+const SECTION_IDS = [
+  "services",
+  "features",
+  "plans",
+  "how-it-works",
+  "areas",
+  "stories",
+  "faq",
+  "pro-recruit",
+  "cta",
+];
+
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [activeSection, setActiveSection] = useState<string | null>(null);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    if (typeof IntersectionObserver === "undefined") return;
+    const elements = SECTION_IDS.map((id) => document.getElementById(id)).filter(
+      (el): el is HTMLElement => el !== null,
+    );
+    if (elements.length === 0) return;
+
+    const obs = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+        if (visible[0]) setActiveSection(visible[0].target.id);
+      },
+      { rootMargin: "-40% 0px -50% 0px", threshold: [0, 0.1, 0.3, 0.5] },
+    );
+    elements.forEach((el) => obs.observe(el));
+    return () => obs.disconnect();
+  }, []);
+
+  useEffect(() => {
+    document.body.classList.toggle("menu-open", menuOpen);
+    if (!menuOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMenuOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [menuOpen]);
+
+  const isActive = (section: string | null) =>
+    section !== null && section === activeSection;
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur border-b border-[#e4eef7]">
+    <header
+      className={`fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur border-b transition-shadow duration-200 ${
+        scrolled
+          ? "border-[#e4eef7] shadow-[0_6px_20px_-12px_rgba(10,37,64,0.15)]"
+          : "border-transparent"
+      }`}
+    >
       <div className="hidden lg:block bg-[#f7fbff] border-b border-[#e4eef7]">
         <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-10 flex justify-end items-center h-9 gap-6 text-[12px]">
           {utilityNav.map((u) => (
@@ -61,15 +121,29 @@ export default function Header() {
           </a>
 
           <nav className="hidden lg:flex items-center gap-7" aria-label="メインメニュー">
-            {mainNav.map((item) => (
-              <a
-                key={item.href}
-                href={item.href}
-                className="text-[14px] font-medium text-[#1a3658] hover:text-[#0099e6] transition-colors"
-              >
-                {item.label}
-              </a>
-            ))}
+            {mainNav.map((item) => {
+              const active = isActive(item.section);
+              return (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  aria-current={active ? "true" : undefined}
+                  className={`relative text-[14px] font-medium transition-colors py-1 ${
+                    active
+                      ? "text-[#0099e6]"
+                      : "text-[#1a3658] hover:text-[#0099e6]"
+                  }`}
+                >
+                  {item.label}
+                  <span
+                    aria-hidden="true"
+                    className={`absolute left-0 right-0 -bottom-1 h-[2px] rounded-full bg-[#0099e6] origin-center transition-transform duration-200 ${
+                      active ? "scale-x-100" : "scale-x-0"
+                    }`}
+                  />
+                </a>
+              );
+            })}
           </nav>
 
           <div className="hidden lg:flex items-center gap-2.5">
@@ -93,8 +167,9 @@ export default function Header() {
           <button
             className="lg:hidden p-2 -mr-2"
             onClick={() => setMenuOpen(!menuOpen)}
-            aria-label="メニュー"
+            aria-label={menuOpen ? "メニューを閉じる" : "メニューを開く"}
             aria-expanded={menuOpen}
+            aria-controls="mobile-nav"
           >
             <svg
               className="w-6 h-6 text-[#0a2540]"
@@ -114,42 +189,62 @@ export default function Header() {
       </div>
 
       {menuOpen && (
-        <nav
-          className="lg:hidden bg-white border-t border-[#e4eef7] px-4 py-4 max-h-[calc(100vh-4rem)] overflow-y-auto"
-          aria-label="モバイルメニュー"
-        >
-          <div className="space-y-1 mb-5">
-            {mainNav.map((item) => (
-              <a
-                key={item.href}
-                href={item.href}
-                className="block text-[15px] font-medium text-[#1a3658] py-3 border-b border-[#f0f5fa]"
-                onClick={() => setMenuOpen(false)}
-              >
-                {item.label}
-              </a>
-            ))}
-          </div>
-          <div className="space-y-1 mb-5 pt-2 border-t border-[#e4eef7]">
-            {utilityNav.map((u) => (
-              <a
-                key={u.label}
-                href={u.href}
-                className="block text-[13px] text-[#5a7090] py-2"
-                onClick={() => setMenuOpen(false)}
-              >
-                {u.label}
-              </a>
-            ))}
-          </div>
-          <a
-            href="#cta"
-            className="block bg-[#0099e6] text-white text-center px-5 py-3.5 rounded-full text-[14px] font-bold"
+        <>
+          <button
+            type="button"
+            aria-label="メニューを閉じる"
+            className="lg:hidden fixed inset-0 top-16 bg-[#0a2540]/40 backdrop-blur-sm z-40 cursor-default"
             onClick={() => setMenuOpen(false)}
+          />
+          <nav
+            id="mobile-nav"
+            className="lg:hidden relative z-50 bg-white border-t border-[#e4eef7] px-4 py-4 max-h-[calc(100vh-4rem)] overflow-y-auto"
+            aria-label="モバイルメニュー"
           >
-            アプリをダウンロード
-          </a>
-        </nav>
+            <div className="space-y-1 mb-5">
+              {mainNav.map((item) => {
+                const active = isActive(item.section);
+                return (
+                  <a
+                    key={item.href}
+                    href={item.href}
+                    aria-current={active ? "true" : undefined}
+                    className={`flex items-center justify-between text-[15px] font-medium py-3 border-b border-[#f0f5fa] ${
+                      active ? "text-[#0099e6]" : "text-[#1a3658]"
+                    }`}
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    <span>{item.label}</span>
+                    {active && (
+                      <span className="text-[10px] font-bold text-[#0099e6]">
+                        ● 現在地
+                      </span>
+                    )}
+                  </a>
+                );
+              })}
+            </div>
+            <div className="space-y-1 mb-5 pt-2 border-t border-[#e4eef7]">
+              {utilityNav.map((u) => (
+                <a
+                  key={u.label}
+                  href={u.href}
+                  className="block text-[13px] text-[#5a7090] py-2"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  {u.label}
+                </a>
+              ))}
+            </div>
+            <a
+              href="#cta"
+              className="block bg-[#0099e6] text-white text-center px-5 py-3.5 rounded-full text-[14px] font-bold"
+              onClick={() => setMenuOpen(false)}
+            >
+              アプリをダウンロード
+            </a>
+          </nav>
+        </>
       )}
     </header>
   );
