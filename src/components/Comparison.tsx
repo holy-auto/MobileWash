@@ -16,7 +16,7 @@ export default function Comparison() {
       className="py-20 sm:py-28 bg-white"
     >
       <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-10">
-        <div className="text-center max-w-2xl mx-auto mb-12">
+        <div className="text-center max-w-2xl mx-auto mb-12" data-reveal>
           <p className="section-label mb-4 inline-flex">Comparison</p>
           <h2
             id="comparison-heading"

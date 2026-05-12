@@ -27,6 +27,16 @@ export default function LiveCounter({
     const node = ref.current;
     if (!node) return;
 
+    const prefersReduced =
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+
+    if (prefersReduced) {
+      setValue(target);
+      startedRef.current = true;
+      return;
+    }
+
     const start = (now: number) => {
       const begin = now;
       const tick = (t: number) => {

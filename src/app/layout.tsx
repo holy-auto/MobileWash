@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Noto_Sans_JP } from "next/font/google";
 import { defaultMetadata } from "@/lib/seo";
 import { SITE } from "@/data/site";
+import PageEnhancements from "@/components/PageEnhancements";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -53,6 +54,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col bg-white text-[#0a2540]">
         {children}
+        <PageEnhancements />
       </body>
     </html>
   );
