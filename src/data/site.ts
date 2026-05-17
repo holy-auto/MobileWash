@@ -46,3 +46,20 @@ export const SITE = {
     "https://www.instagram.com/mobilewash_jp/",
   ],
 } as const;
+
+export const CROWDFUNDING = {
+  platform: "CAMPFIRE",
+  // 開始日時は日本時間（JST, +09:00）。閲覧者のタイムゾーンに関わらず同じ瞬間を指します。
+  startsAt: "2026-06-01T00:00:00+09:00",
+  startLabel: "2026年6月1日",
+  // 公開までは CAMPFIRE トップ／フォロー用 URL。プロジェクト公開後に実 URL へ差し替えてください。
+  projectUrl: "https://camp-fire.jp/",
+  summary:
+    "MobileWash は、出張洗車・出張コーティングのプロをスマホひとつで呼べるカーディテイリングアプリです。サービスの全国展開と認定プロの育成を加速するため、CAMPFIRE にてクラウドファンディングを実施します。",
+  // 支援リターンの「例」。確定内容は開始時に CAMPFIRE プロジェクトページで公開します。
+  perks: [
+    "先行利用クーポン・初回優待",
+    "支援者限定の定額プラン優待",
+    "MobileWash オリジナルカーケアグッズ",
+  ],
+} as const;

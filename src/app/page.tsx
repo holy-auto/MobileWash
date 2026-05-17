@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import NewsTicker from "@/components/NewsTicker";
 import Hero from "@/components/Hero";
+import Crowdfunding from "@/components/Crowdfunding";
 import Stats from "@/components/Stats";
 import Problems from "@/components/Problems";
 import Features from "@/components/Features";
@@ -48,6 +49,7 @@ export default function Home() {
       <main>
         <NewsTicker />
         <Hero />
+        <Crowdfunding />
         <Stats />
         <Problems />
         <Features />
