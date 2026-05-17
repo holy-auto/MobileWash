@@ -1,5 +1,10 @@
 const news = [
   {
+    date: "2026.05.17",
+    tag: "クラファン",
+    text: "2026年6月1日よりCAMPFIREでクラウドファンディングを開始します。開始通知の事前登録を受付中です。",
+  },
+  {
     date: "2026.04.21",
     tag: "プレス",
     text: "MobileWashのコーポレートサイト・先行登録ページを公開しました。",
@@ -17,6 +22,7 @@ const news = [
 ];
 
 const tagColor: Record<string, string> = {
+  クラファン: "bg-[#fff4e6] text-[#b35900]",
   プレス: "bg-[#e6f4ff] text-[#0077b3]",
   募集: "bg-[#e6fbf7] text-[#0a8f7c]",
   お知らせ: "bg-[#f0f0f5] text-[#4a5568]",
@@ -47,7 +53,7 @@ export default function NewsTicker() {
                 {news[0].tag}
               </span>
               <a
-                href="#"
+                href="#crowdfunding"
                 className="text-[#1a3658] hover:text-[#0099e6] transition-colors truncate"
               >
                 {news[0].text}

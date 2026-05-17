@@ -12,6 +12,7 @@ const mainNav = [
 ];
 
 const utilityNav = [
+  { href: "/#crowdfunding", label: "クラウドファンディング" },
   { href: "#cta", label: "個人のお客様" },
   { href: "#cta", label: "法人のお客様" },
   { href: "#pro-recruit", label: "プロ募集" },

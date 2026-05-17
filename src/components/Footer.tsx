@@ -43,6 +43,7 @@ const footerNav = [
     heading: "会社情報",
     links: [
       { label: "会社概要", href: "#" },
+      { label: "クラウドファンディング", href: "/#crowdfunding" },
       { label: "ニュース", href: "#" },
       { label: "プレスリリース", href: "#" },
       { label: "採用情報", href: "#" },
