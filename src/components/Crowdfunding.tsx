@@ -316,6 +316,8 @@ export default function Crowdfunding() {
                 </h4>
                 <p className="text-[12px] sm:text-[13px] text-[#5a7090] leading-relaxed">
                   公開と同時に登場する<strong className="text-[#0099e6]">最先着・最もお得な枠</strong>。
+                  通常価格より大きく割引した<strong className="text-[#0099e6]">先行価格</strong>に、
+                  この枠だけの<strong className="text-[#0099e6]">創業メンバー限定特典</strong>を上乗せ。
                   上限に達し次第終了します。枠数・特別価格は公開時に発表（先着順）。
                   確実に確保するには、公開通知のご登録がおすすめです。
                 </p>
