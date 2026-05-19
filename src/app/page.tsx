@@ -14,6 +14,7 @@ import MediaFeatures from "@/components/MediaFeatures";
 import Media from "@/components/Media";
 import FAQ from "@/components/FAQ";
 import ProRecruit from "@/components/ProRecruit";
+import Crowdfunding from "@/components/Crowdfunding";
 import CTA from "@/components/CTA";
 import SeoContent from "@/components/SeoContent";
 import Footer from "@/components/Footer";
@@ -62,6 +63,7 @@ export default function Home() {
         <ProRecruit />
         <FAQ />
         <SeoContent />
+        <Crowdfunding />
         <CTA />
       </main>
       <Footer />
