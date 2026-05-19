@@ -8,26 +8,125 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const LAUNCH_DATE = "2026.6.1";
 
-const tiers = [
+type Plan = {
+  name: string;
+  price: string;
+  caption: string;
+  benefits: string[];
+  accent?: boolean;
+};
+
+// 利用者（B2C）向け 支援プラン：価格昇順
+const memberPlans: Plan[] = [
   {
-    badge: "数量限定",
-    name: "超早割",
-    desc: "公開直後の最先行価格。最もお得な数量限定枠。スタートダッシュで枠が埋まり次第終了します。",
+    name: "創業サポーター応援プラン",
+    price: "¥3,000",
+    caption: "まずは応援から",
+    benefits: [
+      "サポーターバッジ",
+      "ポイントボーナス（¥1,000相当）",
+      "月次進捗レポートメール",
+      "創業サポートコンテンツへのアクセス",
+    ],
+  },
+  {
+    name: "シルバー会員権プラン",
+    price: "¥8,000",
+    caption: "会員資格 + 割引",
+    benefits: [
+      "即シルバー会員資格へのアクセス",
+      "3%割引",
+      "優先マッチング権（月1回）",
+      "創設サポーターバッジ",
+    ],
+  },
+  {
+    name: "ゴールド会員権プラン",
+    price: "¥25,000",
+    caption: "優先予約 + 専用サポート",
+    benefits: [
+      "ゴールドランクアクセス",
+      "5%割引",
+      "繁忙期優先予約",
+      "専用サポートライン",
+      "特別デザインバッジ",
+    ],
+  },
+  {
+    name: "プラチナ創業メンバー権",
+    price: "¥50,000",
+    caption: "最上位・創業メンバー",
     accent: true,
-  },
-  {
-    badge: "期間限定",
-    name: "早割",
-    desc: "超早割の完売後に登場する先行価格枠。公開後の早い段階での応援者向け。",
-    accent: false,
-  },
-  {
-    badge: "一般",
-    name: "通常リターン",
-    desc: "出張洗車チケット・年間パス・先行エリア優先予約権など。詳細は公開時に発表します。",
-    accent: false,
+    benefits: [
+      "プラチナステータス資格",
+      "8%割引",
+      "指名サポート付き",
+      "ベータテスター権",
+      "年次経営集会への招待",
+    ],
   },
 ];
+
+// プロ（施工者・B2B）向け
+const proPlan: Plan = {
+  name: "プロ登録優待パック",
+  price: "¥30,000",
+  caption: "認定プロとして参加する方向け",
+  benefits: [
+    "3ヶ月ブースト機能付き（¥17,940相当）",
+    "プラットフォーム手数料50%OFF（3ヶ月間）",
+    "認定アーリープロフェッショナルバッジ",
+    "専任サポートスタッフ",
+  ],
+};
+
+function CheckIcon() {
+  return (
+    <svg
+      className="w-4 h-4 shrink-0 mt-0.5 text-[#0099e6]"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2.5}
+      aria-hidden="true"
+    >
+      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+    </svg>
+  );
+}
+
+function PlanCard({ plan }: { plan: Plan }) {
+  return (
+    <div
+      className={`rounded-2xl p-6 bg-white text-[#0a2540] border ${
+        plan.accent
+          ? "border-[#00b4ff] ring-2 ring-[#00b4ff]/25 soft-shadow-lg"
+          : "border-[#e4eef7] soft-shadow"
+      }`}
+    >
+      <p className="text-[11px] font-bold text-[#0099e6] mb-1">
+        {plan.caption}
+      </p>
+      <h4 className="text-base font-bold text-[#0a2540] mb-2 leading-snug">
+        {plan.name}
+      </h4>
+      <p className="heading-tight text-3xl font-bold text-[#0a2540] mb-4">
+        {plan.price}
+      </p>
+      <ul className="space-y-2">
+        {plan.benefits.map((b) => (
+          <li
+            key={b}
+            className="flex items-start gap-2 text-[12px] text-[#5a7090] leading-relaxed"
+          >
+            <CheckIcon />
+            <span>{b}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
 
 export default function Crowdfunding() {
   const [email, setEmail] = useState("");
@@ -103,10 +202,12 @@ export default function Crowdfunding() {
               <p className="text-[15px] text-white/80 mb-8 leading-relaxed max-w-xl">
                 認定プロのネットワークを全国に広げ、もっと多くの駐車場へ「出張洗車」を届けるための応援購入プロジェクトを、
                 クラウドファンディング「CAMPFIRE」にて実施します。
-                公開と同時に、数量限定の<strong className="text-[#00b4ff]">超早割リターン</strong>をご用意します。
+                創業を応援いただく方限定の
+                <strong className="text-[#00b4ff]">特典付きリターン</strong>
+                をご用意します。
               </p>
 
-              <div className="bg-white/8 border border-white/15 backdrop-blur rounded-2xl p-6 lg:p-7 mb-6">
+              <div className="bg-white/8 border border-white/15 backdrop-blur rounded-2xl p-6 lg:p-7">
                 <div className="flex items-baseline justify-between mb-2">
                   <p className="text-[10px] font-bold tracking-[0.25em] text-[#00b4ff] uppercase">
                     Project Launch
@@ -118,38 +219,9 @@ export default function Crowdfunding() {
                   <span className="text-base text-white/60 ml-3">公開スタート</span>
                 </p>
                 <p className="text-[11px] text-white/60 mt-3">
-                  ※ 数量限定の超早割は公開直後に上限へ達する可能性があります。公開通知を受け取って開始時にご参加ください。
+                  ※ 創業メンバー特典はプロジェクト公開時のリターンです。公開通知を受け取って開始時にご参加ください。
                 </p>
               </div>
-
-              <ul className="grid sm:grid-cols-3 gap-3">
-                {tiers.map((t) => (
-                  <li
-                    key={t.name}
-                    className={`rounded-2xl p-4 border backdrop-blur ${
-                      t.accent
-                        ? "bg-[#00b4ff]/15 border-[#00b4ff]/40"
-                        : "bg-white/8 border-white/15"
-                    }`}
-                  >
-                    <span
-                      className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-full mb-2 ${
-                        t.accent
-                          ? "bg-[#00b4ff] text-[#0a2540]"
-                          : "bg-white/15 text-white/80"
-                      }`}
-                    >
-                      {t.badge}
-                    </span>
-                    <h3 className="text-sm font-bold text-white mb-1">
-                      {t.name}
-                    </h3>
-                    <p className="text-[11px] text-white/65 leading-relaxed">
-                      {t.desc}
-                    </p>
-                  </li>
-                ))}
-              </ul>
             </div>
 
             <div className="lg:col-span-6">
@@ -162,7 +234,7 @@ export default function Crowdfunding() {
                 </h3>
                 <p className="text-[12px] text-[#5a7090] leading-relaxed mb-5">
                   ご登録いただいた方へ、CAMPFIRE プロジェクトの公開を最速でお知らせします。
-                  超早割の枠は限られているため、開始と同時のご参加をおすすめします。
+                  創業メンバー特典は開始と同時のご参加がおすすめです。
                 </p>
 
                 <form
@@ -213,11 +285,64 @@ export default function Crowdfunding() {
                   >
                     プライバシーポリシー
                   </a>
-                  に同意したものとみなします。リターン内容・価格は確定次第、本ページおよび CAMPFIRE プロジェクトページにて公開します。
+                  に同意したものとみなします。
                 </p>
               </div>
             </div>
           </div>
+        </div>
+
+        <div className="mt-12 sm:mt-16">
+          <div className="text-center mb-8">
+            <p className="section-label mb-3 inline-flex">Return / リターン予定</p>
+            <h3 className="text-2xl sm:text-3xl font-bold text-[#0a2540]">
+              プロジェクトのリターン
+            </h3>
+            <p className="text-[13px] text-[#5a7090] mt-2 max-w-2xl mx-auto leading-relaxed">
+              下記は予定内容です。最終的なリターン内容・価格・数量・提供時期・適用条件は、CAMPFIRE プロジェクトページの掲載をもって確定とします。
+            </p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {memberPlans.map((p) => (
+              <PlanCard key={p.name} plan={p} />
+            ))}
+          </div>
+
+          <div className="mt-6 rounded-2xl border border-[#e4eef7] bg-[#f7fbff] p-6 sm:p-7">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+              <div className="sm:w-1/3">
+                <p className="text-[11px] font-bold text-[#0099e6] mb-1">
+                  For Professionals / プロ向け
+                </p>
+                <h4 className="text-base font-bold text-[#0a2540] mb-1 leading-snug">
+                  {proPlan.name}
+                </h4>
+                <p className="heading-tight text-3xl font-bold text-[#0a2540]">
+                  {proPlan.price}
+                </p>
+                <p className="text-[11px] text-[#5a7090] mt-1">
+                  {proPlan.caption}
+                </p>
+              </div>
+              <ul className="sm:w-2/3 grid sm:grid-cols-2 gap-x-6 gap-y-2">
+                {proPlan.benefits.map((b) => (
+                  <li
+                    key={b}
+                    className="flex items-start gap-2 text-[12px] text-[#5a7090] leading-relaxed"
+                  >
+                    <CheckIcon />
+                    <span>{b}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          <p className="text-[11px] text-[#8ba0ba] mt-5 leading-relaxed">
+            ※「¥1,000相当」「¥17,940相当」等の表記は、提供予定特典の参考価値です。比較対象価格の根拠・割引特典の適用条件（期間・回数・対象サービス）は CAMPFIRE プロジェクトページにて明示します。
+            割引・会員資格・優先予約等の特典内容は、サービス正式提供開始後に適用されます。
+          </p>
         </div>
       </div>
     </section>
