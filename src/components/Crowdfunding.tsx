@@ -303,6 +303,35 @@ export default function Crowdfunding() {
             </p>
           </div>
 
+          <div className="mb-6 rounded-2xl border-2 border-[#00b4ff] bg-gradient-to-br from-[#e6f4ff] via-white to-[#e6fbf7] p-6 sm:p-7 relative overflow-hidden">
+            <div className="absolute -top-16 -right-16 w-56 h-56 bg-[#00b4ff]/15 rounded-full blur-3xl pointer-events-none" />
+            <div className="relative flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
+              <div className="flex-1">
+                <span className="inline-flex items-center gap-1.5 text-[10px] font-bold tracking-[0.15em] text-white uppercase bg-[#00b4ff] px-2.5 py-1 rounded-full mb-2">
+                  <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+                  数量限定・先着順
+                </span>
+                <h4 className="text-lg sm:text-xl font-bold text-[#0a2540] mb-1.5">
+                  創業先行枠（超早割）
+                </h4>
+                <p className="text-[12px] sm:text-[13px] text-[#5a7090] leading-relaxed">
+                  公開と同時に登場する<strong className="text-[#0099e6]">最先着・最もお得な枠</strong>。
+                  上限に達し次第終了します。枠数・特別価格は公開時に発表（先着順）。
+                  確実に確保するには、公開通知のご登録がおすすめです。
+                </p>
+              </div>
+              <div className="shrink-0 text-center sm:border-l sm:border-[#cfe4f5] sm:pl-6">
+                <p className="text-[10px] font-bold tracking-[0.2em] text-[#0099e6] uppercase mb-1">
+                  Limited
+                </p>
+                <p className="heading-tight text-3xl sm:text-4xl font-bold text-[#0a2540]">
+                  先着限定
+                </p>
+                <p className="text-[11px] text-[#8ba0ba] mt-1">公開時に枠数発表</p>
+              </div>
+            </div>
+          </div>
+
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {memberPlans.map((p) => (
               <PlanCard key={p.name} plan={p} />
@@ -340,7 +369,7 @@ export default function Crowdfunding() {
           </div>
 
           <p className="text-[11px] text-[#8ba0ba] mt-5 leading-relaxed">
-            ※「¥1,000相当」「¥17,940相当」等の表記は、提供予定特典の参考価値です。比較対象価格の根拠・割引特典の適用条件（期間・回数・対象サービス）は CAMPFIRE プロジェクトページにて明示します。
+            ※「¥1,000相当」「¥17,940相当」等は、当社通常提供価格に基づく参考価値です。比較対象価格の算定根拠および割引・会員特典の適用条件（期間・回数・対象サービス）は CAMPFIRE プロジェクトページに明示します。
             割引・会員資格・優先予約等の特典内容は、サービス正式提供開始後に適用されます。
           </p>
         </div>
