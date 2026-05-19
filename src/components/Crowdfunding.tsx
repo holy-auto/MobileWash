@@ -119,6 +119,72 @@ const priorityTiers: PriorityTier[] = [
   },
 ];
 
+// 個人向け 創業パトロン枠（プラチナ上位・数量限定）
+type PatronTier = {
+  name: string;
+  price: string;
+  limit: string;
+  benefits: string[];
+  accent?: boolean;
+};
+
+const patronTiers: PatronTier[] = [
+  {
+    name: "創業パトロン",
+    price: "¥100,000",
+    limit: "先着20名",
+    benefits: [
+      "プラチナ特典をすべて含む",
+      "出張洗車 年間利用枠（回数はCAMPFIREに明示）",
+      "公式サイトに創業パトロンとして刻名",
+    ],
+  },
+  {
+    name: "創業エグゼクティブパトロン",
+    price: "¥300,000",
+    limit: "先着5名",
+    accent: true,
+    benefits: [
+      "創業パトロン特典をすべて含む",
+      "代表との事業説明会／会食ご招待",
+      "アプリ内に創業者クレジットを恒久掲載",
+      "創業メンバー限定ノベルティ",
+    ],
+  },
+];
+
+// 法人・事業者向け スポンサープラン（役務＋掲載の協賛。投資ではない）
+type SponsorTier = {
+  name: string;
+  price: string;
+  scope: string;
+  accent?: boolean;
+};
+
+const sponsorTiers: SponsorTier[] = [
+  {
+    name: "ブロンズスポンサー",
+    price: "¥100,000",
+    scope: "社用車 出張洗車パック＋公式サイト 感謝クレジット掲載",
+  },
+  {
+    name: "シルバースポンサー",
+    price: "¥300,000",
+    scope: "出張洗車パック拡大＋公式サイト・アプリ内ロゴ掲載＋ローンチPR 協賛クレジット",
+  },
+  {
+    name: "ゴールドスポンサー",
+    price: "¥500,000",
+    scope: "上記拡大＋指定エリア優先展開＋自社・管理駐車場の出張対応枠",
+    accent: true,
+  },
+  {
+    name: "プラチナスポンサー",
+    price: "¥1,000,000",
+    scope: "フリート年間契約相当＋共同企画・取材協力＋最上位協賛クレジット",
+  },
+];
+
 function CheckIcon() {
   return (
     <svg
@@ -408,6 +474,67 @@ export default function Crowdfunding() {
             ))}
           </div>
 
+          <div className="mt-6 rounded-2xl bg-gradient-to-br from-[#0a2540] via-[#0e2d52] to-[#143a6b] p-6 sm:p-8 relative overflow-hidden">
+            <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-[#00b4ff]/15 rounded-full blur-3xl pointer-events-none" />
+            <div className="relative">
+              <p className="text-[10px] font-bold tracking-[0.25em] text-[#00b4ff] uppercase mb-1">
+                Founding Patron / 創業パトロン枠
+              </p>
+              <h4 className="text-lg sm:text-xl font-bold text-white mb-1">
+                プラチナ上位・数量限定の特別枠
+              </h4>
+              <p className="text-[12px] text-white/60 mb-5">
+                立ち上げを強く後押しいただく方への、刻名・体験を伴う限定枠です。
+              </p>
+              <div className="grid sm:grid-cols-2 gap-4">
+                {patronTiers.map((t) => (
+                  <div
+                    key={t.name}
+                    className={`rounded-2xl p-5 border backdrop-blur ${
+                      t.accent
+                        ? "bg-[#00b4ff]/15 border-[#00b4ff]/50"
+                        : "bg-white/8 border-white/15"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-1.5">
+                      <h5 className="text-sm font-bold text-white">{t.name}</h5>
+                      <span className="text-[10px] font-bold text-[#0a2540] bg-[#00b4ff] px-2 py-0.5 rounded-full">
+                        {t.limit}
+                      </span>
+                    </div>
+                    <p className="heading-tight text-3xl font-bold text-white mb-3">
+                      {t.price}
+                    </p>
+                    <ul className="space-y-1.5">
+                      {t.benefits.map((b) => (
+                        <li
+                          key={b}
+                          className="flex items-start gap-2 text-[11px] text-white/70 leading-relaxed"
+                        >
+                          <svg
+                            className="w-3.5 h-3.5 shrink-0 mt-0.5 text-[#00b4ff]"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth={2.5}
+                            aria-hidden="true"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M5 13l4 4L19 7"
+                            />
+                          </svg>
+                          <span>{b}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
           <div className="mt-6 rounded-2xl border border-[#e4eef7] bg-[#f7fbff] p-6 sm:p-7">
             <div className="flex flex-col sm:flex-row sm:items-center gap-4">
               <div className="sm:w-1/3">
@@ -438,9 +565,48 @@ export default function Crowdfunding() {
             </div>
           </div>
 
+          <div className="mt-6">
+            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 mb-4">
+              <div>
+                <p className="text-[11px] font-bold text-[#0099e6] mb-1">
+                  For Business / 法人・事業者向け スポンサープラン
+                </p>
+                <h4 className="text-base sm:text-lg font-bold text-[#0a2540]">
+                  社用車・駐車場をお持ちの企業さまへ
+                </h4>
+              </div>
+              <p className="text-[11px] text-[#8ba0ba] sm:text-right max-w-md leading-relaxed">
+                協賛（出張洗車の役務＋掲載）の対価です。出資・配当等の投資ではありません。
+              </p>
+            </div>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {sponsorTiers.map((s) => (
+                <div
+                  key={s.name}
+                  className={`rounded-2xl p-5 bg-white border ${
+                    s.accent
+                      ? "border-[#00b4ff] ring-2 ring-[#00b4ff]/25 soft-shadow-lg"
+                      : "border-[#e4eef7] soft-shadow"
+                  }`}
+                >
+                  <h5 className="text-sm font-bold text-[#0a2540] mb-1">
+                    {s.name}
+                  </h5>
+                  <p className="heading-tight text-2xl font-bold text-[#0a2540] mb-2">
+                    {s.price}
+                  </p>
+                  <p className="text-[11px] text-[#5a7090] leading-relaxed pt-2 border-t border-[#eef4fa]">
+                    {s.scope}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+
           <p className="text-[11px] text-[#8ba0ba] mt-5 leading-relaxed">
+            ※ 本プロジェクトは購入型クラウドファンディングです。スポンサー・パトロン特典は役務・掲載等の対価であり、出資・配当・利益分配等の投資ではありません。
             ※「¥1,000相当」「¥17,940相当」等は、当社通常提供価格に基づく参考価値です。比較対象価格の算定根拠および割引・会員特典の適用条件（期間・回数・対象サービス）は CAMPFIRE プロジェクトページに明示します。
-            割引・会員資格・優先予約等の特典内容は、サービス正式提供開始後に適用されます。
+            割引・会員資格・優先予約・スポンサー役務（台数・回数・掲載期間）等の特典内容は、サービス正式提供開始後に適用・提供されます。
           </p>
         </div>
       </div>
