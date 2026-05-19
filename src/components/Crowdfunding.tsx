@@ -80,6 +80,45 @@ const proPlan: Plan = {
   ],
 };
 
+// 数量限定 創業先行枠（超早割）：B＝先行価格を下げる ＋ C＝先行枠限定ワンタイム特典
+type PriorityTier = {
+  name: string;
+  regular: string;
+  price: string;
+  off: string;
+  limit: string;
+  bonus: string;
+  accent?: boolean;
+};
+
+const priorityTiers: PriorityTier[] = [
+  {
+    name: "創業先行・シルバー",
+    regular: "¥8,000",
+    price: "¥6,000",
+    off: "約25%OFF",
+    limit: "先着50名",
+    bonus: "創業メンバー限定バッジ＋初回出張洗車¥1,000クーポン",
+  },
+  {
+    name: "創業先行・ゴールド",
+    regular: "¥25,000",
+    price: "¥18,000",
+    off: "約28%OFF",
+    limit: "先着30名",
+    bonus: "初回出張洗車無料券1回＋対応エリア優先",
+    accent: true,
+  },
+  {
+    name: "創業先行・プラチナ",
+    regular: "¥50,000",
+    price: "¥38,000",
+    off: "約24%OFF",
+    limit: "先着10名",
+    bonus: "創業メンバー刻印／年次集会 創業席",
+  },
+];
+
 function CheckIcon() {
   return (
     <svg
@@ -303,34 +342,63 @@ export default function Crowdfunding() {
             </p>
           </div>
 
-          <div className="mb-6 rounded-2xl border-2 border-[#00b4ff] bg-gradient-to-br from-[#e6f4ff] via-white to-[#e6fbf7] p-6 sm:p-7 relative overflow-hidden">
+          <div className="mb-6 rounded-2xl border-2 border-[#00b4ff] bg-gradient-to-br from-[#e6f4ff] via-white to-[#e6fbf7] p-6 sm:p-8 relative overflow-hidden">
             <div className="absolute -top-16 -right-16 w-56 h-56 bg-[#00b4ff]/15 rounded-full blur-3xl pointer-events-none" />
-            <div className="relative flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
-              <div className="flex-1">
-                <span className="inline-flex items-center gap-1.5 text-[10px] font-bold tracking-[0.15em] text-white uppercase bg-[#00b4ff] px-2.5 py-1 rounded-full mb-2">
-                  <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
-                  数量限定・先着順
-                </span>
-                <h4 className="text-lg sm:text-xl font-bold text-[#0a2540] mb-1.5">
-                  創業先行枠（超早割）
-                </h4>
-                <p className="text-[12px] sm:text-[13px] text-[#5a7090] leading-relaxed">
-                  公開と同時に登場する<strong className="text-[#0099e6]">最先着・最もお得な枠</strong>。
-                  通常価格より大きく割引した<strong className="text-[#0099e6]">先行価格</strong>に、
-                  この枠だけの<strong className="text-[#0099e6]">創業メンバー限定特典</strong>を上乗せ。
-                  上限に達し次第終了します。枠数・特別価格は公開時に発表（先着順）。
-                  確実に確保するには、公開通知のご登録がおすすめです。
+            <div className="relative">
+              <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 mb-5">
+                <div>
+                  <span className="inline-flex items-center gap-1.5 text-[10px] font-bold tracking-[0.15em] text-white uppercase bg-[#00b4ff] px-2.5 py-1 rounded-full mb-2">
+                    <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+                    数量限定・先着順
+                  </span>
+                  <h4 className="text-lg sm:text-xl font-bold text-[#0a2540]">
+                    創業先行枠（超早割）
+                  </h4>
+                </div>
+                <p className="text-[12px] text-[#5a7090] leading-relaxed sm:text-right max-w-md">
+                  公開と同時に登場する<strong className="text-[#0099e6]">最もお得な枠</strong>。
+                  上限到達で終了します。確保には公開通知のご登録がおすすめです。
                 </p>
               </div>
-              <div className="shrink-0 text-center sm:border-l sm:border-[#cfe4f5] sm:pl-6">
-                <p className="text-[10px] font-bold tracking-[0.2em] text-[#0099e6] uppercase mb-1">
-                  Limited
-                </p>
-                <p className="heading-tight text-3xl sm:text-4xl font-bold text-[#0a2540]">
-                  先着限定
-                </p>
-                <p className="text-[11px] text-[#8ba0ba] mt-1">公開時に枠数発表</p>
+
+              <div className="grid sm:grid-cols-3 gap-4">
+                {priorityTiers.map((t) => (
+                  <div
+                    key={t.name}
+                    className={`rounded-2xl bg-white p-5 border ${
+                      t.accent
+                        ? "border-[#00b4ff] ring-2 ring-[#00b4ff]/25 soft-shadow-lg"
+                        : "border-[#cfe4f5] soft-shadow"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <h5 className="text-sm font-bold text-[#0a2540]">
+                        {t.name}
+                      </h5>
+                      <span className="text-[10px] font-bold text-white bg-[#c41e60] px-2 py-0.5 rounded-full">
+                        {t.off}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-[#8ba0ba] mb-0.5">
+                      当社通常提供価格{" "}
+                      <span className="line-through">{t.regular}</span> のところ
+                    </p>
+                    <p className="heading-tight text-3xl font-bold text-[#0a2540]">
+                      {t.price}
+                      <span className="text-[11px] font-bold text-[#0099e6] ml-2 align-middle">
+                        {t.limit}
+                      </span>
+                    </p>
+                    <p className="text-[11px] text-[#5a7090] leading-relaxed mt-2 pt-2 border-t border-[#eef4fa]">
+                      ＋特典：{t.bonus}
+                    </p>
+                  </div>
+                ))}
               </div>
+
+              <p className="text-[11px] text-[#8ba0ba] mt-4">
+                ※ 先着順・各枠の上限到達で終了。継続割引（3/5/8%）は通常会員プランと同率（先行枠で変動しません）。比較対象価格・適用条件は CAMPFIRE プロジェクトページに明示します。
+              </p>
             </div>
           </div>
 
