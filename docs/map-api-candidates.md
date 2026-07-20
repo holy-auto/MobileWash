@@ -166,10 +166,36 @@ MobileWash（出張洗車マッチング）で使う **地図表示・経路案�
 
 ---
 
-## 7. 参考リンク
+## 7. データ主権・自社にデータを貯める観点
+
+「自社にデータを貯めたい」は2種類に分けて考える。
+
+- **自社が集めたデータ**（GPS位置ログ・予約・走行実績など）: **どのプロバイダを使っても自社のもの**。現状も `pro_profiles.latitude/longitude` 等でSupabaseに蓄積済み。制約なし。
+- **プロバイダの地図/経路コンテンツ**（算出したルート・ETA・地図タイル）: ここは各社ToSでキャッシュ・保存が制限される。「貯められるか」はこれで決まる。
+
+### 保存・自社ホストの可否
+
+| 選択肢 | ルート結果を自社DBに保存 | 地図データを自社ホスト | データ主権 | 備考 |
+|---|---|---|---|---|
+| **セルフホストOSS**（OSRM / Valhalla / ORS + OSM） | ◎ 自由 | ◎（MapLibre + 自前タイル） | ◎ 完全 | OSM=ODbLライセンス、クレジット表示必須。運用は自前 |
+| **Mapbox** | △ 標準は制限、オンプレ版 **Atlas** なら可 | ○（Atlas / 自前タイル） | ○（Atlas契約時） | Geocodingは "Permanent" プランで保存可 |
+| **HERE** | △〜○ エンタープライズ/商用ライセンス次第 | ○（オンプレ提供あり） | ○（要ライセンス） | 商用契約で柔軟性は高め、要個別確認 |
+| **Google** | ✕ ToSで厳格制限（lat/lng 最大30日・place ID 無期限のみ、経路のバルク保存は禁止） | ✕（ネイティブSDK表示のみ） | ✕ | 「貯める」用途には最も不向き |
+
+### 結論
+
+- **「経路・地図データを自社に蓄積したい」が主目的なら → セルフホストOSS（OSRM / Valhalla / OpenRouteService）が本命**。エンジン・地図・算出結果すべてを自社インフラに置け、ルート/ETA履歴を自由に蓄積・分析できる（ML・需要予測の素材化も可能）。
+- 商用の品質を保ちつつオンプレ寄せたいなら **Mapbox Atlas** か **HERE エンタープライズ**。
+- **Google はキャッシュ・保存禁止が厳しく、この用途には向かない**（表示無料・国内品質は強いが、データを"貯める"設計とは相性が悪い）。
+- なお **GPS位置ログ・予約・走行実績などの自社データは、どの表示/経路プロバイダを選んでもSupabaseに蓄積可能**（プロバイダ選定とは独立の論点）。
+
+---
+
+## 8. 参考リンク
 
 - [Google Maps Platform 料金概要](https://developers.google.com/maps/billing-and-pricing/overview) / [無料枠(製品ごと最大1万回/月)](https://mapsplatform.google.com/resources/blog/start-building-today-with-up-to-10-000-monthly-free-calls-per-product/) / [Routes API 課金](https://developers.google.com/maps/documentation/routes/usage-and-billing)
 - [Mapbox Pricing](https://www.mapbox.com/pricing) / [Directions API Docs](https://docs.mapbox.com/api/navigation/directions/) / [Navigation SDK Pricing](https://docs.mapbox.com/ios/navigation/guides/pricing/)
 - [HERE Pricing](https://www.here.com/get-started/pricing) / [HERE Routing](https://www.here.com/platform/routing)
 - [Valhalla (OSS)](https://github.com/valhalla/valhalla) / [OSRM](https://wiki.openstreetmap.org/wiki/Open_Source_Routing_Machine) / [OpenRouteService](https://openrouteservice.org/)
 - [NAVITIME API](https://api-sdk.navitime.co.jp/api/) / [ZENRIN Maps API](https://www.zenrin-datacom.net/solution/zenrin-maps-api)
+- ToS（キャッシュ・保存）: [Google Maps Service Terms](https://cloud.google.com/maps-platform/terms/maps-service-terms) / [Mapbox API Caching](https://docs.mapbox.com/help/dive-deeper/api-caching/) / [Mapbox Atlas（オンプレ）](https://www.mapbox.com/atlas) / [OSM ODbL](https://www.openstreetmap.org/copyright)
