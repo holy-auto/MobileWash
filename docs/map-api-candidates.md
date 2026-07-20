@@ -102,10 +102,74 @@ MobileWash（出張洗車マッチング）で使う **地図表示・経路案�
 
 ---
 
-## 6. 参考リンク
+## 6. 商用経路API 3社の詳細
 
-- [Google Maps Platform 料金概要](https://developers.google.com/maps/billing-and-pricing/overview) / [無料枠(製品ごと最大1万回/月)](https://mapsplatform.google.com/resources/blog/start-building-today-with-up-to-10-000-monthly-free-calls-per-product/)
-- [Mapbox Pricing](https://www.mapbox.com/pricing) / [Navigation SDK Pricing](https://docs.mapbox.com/ios/navigation/guides/pricing/)
-- [HERE Pricing](https://www.here.com/get-started/pricing)
+現状のGoogleと、有力な代替である Mapbox / HERE を深掘り。
+（MobileWashの経路利用は「配車追跡中に車ルートを1本取得」する程度で、渋滞考慮は必須ではない前提）
+
+### 6-1. Google（Directions API / Routes API）
+
+| 項目 | 内容 |
+|---|---|
+| 位置づけ | **Directions API は Legacy 化**（2025改定）。新規は後継の **Routes API** 推奨 |
+| 無料枠 | Essentials 10,000回/月、Pro 5,000回/月（SKUごと） |
+| 単価 | **Compute Routes Essentials: $5 / 1,000**（基本の車ルート）／ **Pro: $10 / 1,000**（`TRAFFIC_AWARE` 等の渋滞考慮を使うと約2倍） |
+| 課金単位 | 1リクエスト＝1課金。waypoint多数や高度機能でPro扱いに昇格 |
+| 日本カバレッジ | ◎（道路・規制・住所とも国内最高クラス）、日本語 ◎ |
+| 地図表示 | ネイティブSDK表示は**無制限無料**（別課金なし）。表示を移さない限りタダ |
+| 移行コスト | レスポンス形式が変わる（`encodedPolyline` はフィールドマスクで取得、既存 `decodePolyline` はほぼ流用可）。呼び出し口は `get-directions/index.ts` の1ファイルのみ |
+| 向き | 現状維持・国内品質・渋滞ETA重視。ただし単価は3社で最も高い |
+
+### 6-2. Mapbox（Directions API）
+
+| 項目 | 内容 |
+|---|---|
+| 無料枠 | **100,000回/月**（3社で最大） |
+| 単価 | 100,001–500,000: **$2.00 / 1,000** ／ 500,001–1,000,000: $1.60 / 1,000（ボリューム割引） |
+| 課金単位 | 1リクエスト＝1課金（複数waypointを含めても1）。Navigation SDK利用時はセッション内リクエスト無料（100 MAU + 1,000 trips 無料） |
+| 日本カバレッジ | ○（OSMベース。都市部は良好だが、細街路の規制情報はGoogle/HEREより弱め）、日本語 ○ |
+| 地図表示 | 同ベンダーの `@rnmapbox/maps` で表示も統一可。デザイン自由度が高い |
+| 移行コスト | レスポンスは GeoJSON or encoded polyline を選択可。Edge Function差し替えで対応 |
+| 向き | 無料枠を厚く取りたい／地図デザインも刷新したい場合。中規模まで実質無料で回せる |
+
+### 6-3. HERE（Routing API）
+
+| 項目 | 内容 |
+|---|---|
+| 無料枠 | **30,000トランザクション/月**（Basic Routing: 車・自転車・徒歩） |
+| 単価 | **$0.75 / 1,000**（3社で**最安**）。一定量超で約20%のボリューム割引 |
+| 渋滞考慮 | Advanced Traffic は無料2,500/月、超過 **$5 / 1,000**（渋滞を使うと一気に高くなる点に注意） |
+| 日本カバレッジ | ○〜◎（車載ナビ由来で自動車道路・規制データに定評）、日本語 ○ |
+| 地図表示 | 表示SDKはあるが **React Native公式サポートが薄い**。表示はGoogle/MapLibre併用が現実的 |
+| 移行コスト | Edge Functionの差し替えのみ。ただし表示ベンダーは別立てになりやすい |
+| 向き | 経路の**単価を最優先で下げたい**／渋滞考慮は使わない用途に最適 |
+
+### 6-4. コスト・シミュレーション（車ルート・渋滞考慮なし）
+
+月あたりの経路リクエスト数別の概算（ボリューム割引・無料枠適用後、渋滞なしの素の車ルート）:
+
+| 月間リクエスト | Google (Essentials $5/1k) | Mapbox ($2/1k, 10万無料) | HERE ($0.75/1k, 3万無料) |
+|---|---|---|---|
+| 10,000 | **$0**（無料枠内） | **$0** | **$0** |
+| 50,000 | 約 **$200** | **$0** | 約 **$15** |
+| 100,000 | 約 **$450** | **$0** | 約 **$53** |
+| 300,000 | 約 **$1,450** | 約 **$400** | 約 **$203** |
+
+> 傾向: **〜10万/月なら Mapbox が実質無料で最強**。それ以上の規模では **HERE が単価最安で頭打ちしにくい**。Google は国内品質・渋滞ETA・表示無料が武器だが素の単価は最も高い。
+
+### 6-5. MobileWashでの当てはめ
+
+- 経路取得は「配車追跡中に1本」程度 → **現状規模ではどれを選んでも無料枠内**。コスト理由だけの緊急移行は不要。
+- 追跡ユーザーが増えて **月1万回を超え始めたら**、まず **Mapbox（10万無料）** に寄せるのが手離れ良い。さらに規模が出たら **HERE（単価最安）**。
+- **渋滞を考慮したETA**を売りにするなら Google Routes Pro か HERE Advanced Traffic（どちらも単価上がるので費用対効果を要検証）。
+- 地図表示は当面Google（`react-native-maps`）維持でOK。HEREに寄せる場合は表示を別ベンダーにする前提で設計する。
+
+---
+
+## 7. 参考リンク
+
+- [Google Maps Platform 料金概要](https://developers.google.com/maps/billing-and-pricing/overview) / [無料枠(製品ごと最大1万回/月)](https://mapsplatform.google.com/resources/blog/start-building-today-with-up-to-10-000-monthly-free-calls-per-product/) / [Routes API 課金](https://developers.google.com/maps/documentation/routes/usage-and-billing)
+- [Mapbox Pricing](https://www.mapbox.com/pricing) / [Directions API Docs](https://docs.mapbox.com/api/navigation/directions/) / [Navigation SDK Pricing](https://docs.mapbox.com/ios/navigation/guides/pricing/)
+- [HERE Pricing](https://www.here.com/get-started/pricing) / [HERE Routing](https://www.here.com/platform/routing)
 - [Valhalla (OSS)](https://github.com/valhalla/valhalla) / [OSRM](https://wiki.openstreetmap.org/wiki/Open_Source_Routing_Machine) / [OpenRouteService](https://openrouteservice.org/)
 - [NAVITIME API](https://api-sdk.navitime.co.jp/api/) / [ZENRIN Maps API](https://www.zenrin-datacom.net/solution/zenrin-maps-api)
