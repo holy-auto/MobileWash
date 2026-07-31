@@ -379,7 +379,7 @@ export default function Features() {
               className={`relative rounded-xl overflow-hidden cursor-pointer group transition-all duration-300 ${
                 i === activeIndex ? 'ring-2 ring-offset-2' : 'opacity-70 hover:opacity-100'
               }`}
-              style={i === activeIndex ? { ringColor: f.color } : {}}
+              style={i === activeIndex ? ({ '--tw-ring-color': f.color } as React.CSSProperties) : {}}
             >
               <div className="aspect-[4/3]">
                 <img

@@ -26,7 +26,7 @@ const cases = [
 
 export default function UseCases() {
   const heading = useScrollAnimation();
-  const list = useScrollAnimation();
+  const list = useScrollAnimation<HTMLUListElement>();
   return (
     <section id="stories" className="py-20 sm:py-28 bg-white">
       <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-10">

@@ -35,7 +35,7 @@ const cases = [
 
 export default function CorporateCases() {
   const heading = useScrollAnimation();
-  const list = useScrollAnimation();
+  const list = useScrollAnimation<HTMLUListElement>();
 
   return (
     <section id="cases" className="py-20 sm:py-28 bg-white">

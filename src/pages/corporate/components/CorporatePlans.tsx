@@ -59,7 +59,7 @@ const plans = [
 
 export default function CorporatePlans() {
   const heading = useScrollAnimation();
-  const list = useScrollAnimation();
+  const list = useScrollAnimation<HTMLUListElement>();
 
   return (
     <section id="plans" className="py-20 sm:py-28 bg-[#f7fbff]">

@@ -34,6 +34,9 @@
   },
   "name": "react",
   "private": true,
+  "overrides": {
+    "motion-dom": "12.23.12"
+  },
   "scripts": {
     "build": "vite build",
     "dev": "vite",

@@ -41,7 +41,7 @@ const features = [
 
 export default function CorporateFeatures() {
   const heading = useScrollAnimation();
-  const list = useScrollAnimation();
+  const list = useScrollAnimation<HTMLUListElement>();
 
   return (
     <section id="features" className="py-20 sm:py-28 bg-white">

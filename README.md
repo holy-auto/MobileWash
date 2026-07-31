@@ -1,36 +1,48 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MobileWash
 
-## Getting Started
+出張洗車・出張コーティング専門のカーディテイリングアプリ「MobileWash」の公式サイト（ランディングページ）。
+GPSで近くの認定プロを自動マッチングし、最短5分で駐車場まで出張するサービスのプレローンチサイトです。
 
-First, run the development server:
+## 技術スタック
+
+- [Vite](https://vitejs.dev/) + [React 19](https://react.dev/)
+- [React Router](https://reactrouter.com/) — ルーティング
+- [Tailwind CSS](https://tailwindcss.com/) — スタイリング
+- [framer-motion](https://www.framer.com/motion/) — アニメーション
+- [i18next](https://www.i18next.com/) — 多言語対応
+- TypeScript
+
+## セットアップ
+
+```bash
+npm install
+```
+
+## 開発
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+開発サーバーが起動したら、ターミナルに表示される URL（既定 http://localhost:5173）をブラウザで開きます。
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## その他のコマンド
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build       # 本番ビルド
+npm run preview     # ビルド成果物のプレビュー
+npm run lint        # ESLint
+npm run type-check  # 型チェック
+```
 
-## Learn More
+## ディレクトリ構成
 
-To learn more about Next.js, take a look at the following resources:
+- `src/main.tsx` — エントリーポイント
+- `src/router/` — ルーティング設定
+- `src/pages/` — 各ページ（home / corporate / company / legal など）
+- `src/components/feature/` — 画面遷移などの共通コンポーネント
+- `src/hooks/` — カスタムフック
+- `src/i18n/` — 多言語リソース
+- `src/mocks/` — 表示用モックデータ
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+> `mobile/` は別途 React Native（Expo）アプリのため、独自の設定・依存で管理されています。
