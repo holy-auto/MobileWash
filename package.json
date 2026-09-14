@@ -38,11 +38,13 @@
     "motion-dom": "12.23.12"
   },
   "scripts": {
-    "build": "vite build",
+    "build": "vite build && node scripts/prerender.mjs",
     "dev": "vite",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "type-check": "tsc --noEmit --project tsconfig.app.json"
+    "type-check": "tsc --noEmit --project tsconfig.app.json",
+    "prerender": "node scripts/prerender.mjs",
+    "check:seo": "node scripts/check-seo.mjs"
   },
   "type": "module",
   "version": "0.0.0"

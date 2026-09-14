@@ -11,7 +11,7 @@ export default function CompanyNewsPage() {
   useEffect(() => {
     document.title = 'ニュース | MobileWash';
     const desc = document.querySelector('meta[name="description"]');
-    if (desc) desc.setAttribute('content', 'MobileWashの最新ニュース一覧。クラウドファンディング開始、メディア掲載実績、サービスアップデート、採用情報など。出張洗車・出張コーティングサービスMobileWashの最新情報をお届けします。');
+    if (desc) desc.setAttribute('content', 'MobileWash のお知らせ一覧。サービスの準備状況、運営会社である株式会社HOLYに関する発表を掲載しています。');
     const canonical = document.querySelector('link[rel="canonical"]');
     if (canonical) canonical.setAttribute('href', 'https://mobilewash.app/company/news');
     window.scrollTo(0, 0);
