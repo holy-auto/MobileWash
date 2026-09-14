@@ -241,6 +241,7 @@ export default function CompanyAboutPage() {
                   href={site.href}
                   target="_blank"
                   rel="noopener"
+                  aria-label={`${site.name} の公式サイト（新しいタブで開く）`}
                   className="rounded-xl border border-[#e8ecf0] p-4 hover:border-[#d0dbe6] transition-colors cursor-pointer"
                 >
                   <p className="flex items-center gap-1.5 text-[13px] font-bold text-[#0a2540]">

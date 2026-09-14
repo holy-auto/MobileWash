@@ -148,6 +148,7 @@ export default function Footer() {
                             href={link.href}
                             target="_blank"
                             rel="noopener"
+                            aria-label={`${link.label}（新しいタブで開く）`}
                             className="inline-flex items-center gap-1 text-[12px] text-white/55 hover:text-white transition-colors cursor-pointer"
                           >
                             {link.label}
