@@ -14,7 +14,7 @@
  * ponytail: 突き合わせは文字列比較。title をテンプレート化すると効かなくなる。
  * そのときはページ側を routes.ts から読む形に直して、この検査ごと捨てる。
  */
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import assert from "node:assert/strict";
@@ -22,7 +22,9 @@ import { createJiti } from "jiti";
 
 const repoRoot = fileURLToPath(new URL("..", import.meta.url));
 const read = (p) => readFileSync(join(repoRoot, p), "utf8");
-const { ROUTES } = await createJiti(import.meta.url).import("../src/seo/routes.ts");
+const jiti = createJiti(import.meta.url);
+const { ROUTES } = await jiti.import("../src/seo/routes.ts");
+const { parsePostFile } = await jiti.import("../src/content/posts-parse.ts");
 
 // --- 1) routes.ts が router の実ルートを過不足なく覆っているか ---
 const routerPaths = [...read("src/router/config.tsx").matchAll(/path:\s*"([^"]+)"/g)]
@@ -81,7 +83,32 @@ for (const route of ROUTES) {
   checked += 1;
 }
 
-// --- 3) 手書きの sitemap.xml が残っていないか（プリレンダが生成する） ---
+// --- 3) お知らせ・プレスリリースの md がすべてパースできるか ---
+// 壊れた frontmatter は `npm run build` でも落ちるが、プッシュ前にここで気づけるようにする。
+const postCounts = {};
+for (const kind of ["news", "press"]) {
+  const dir = join(repoRoot, "src/content", kind);
+  const files = readdirSync(dir).filter((f) => f.endsWith(".md"));
+  assert.ok(files.length > 0, `src/content/${kind}/ に記事が1件も無い`);
+
+  const slugs = new Set();
+  for (const file of files) {
+    const slug = file.replace(/\.md$/, "");
+    // 記事のファイル名は日付で始める規約（読み込み側はこれ以外を無視するので、
+    // 名前を間違えると黙って公開されない。ここで落として気づけるようにする）。
+    assert.match(slug, /^\d{4}-\d{2}/, `src/content/${kind}/${file}: ファイル名は YYYY-MM で始める（この名前でないと公開されない）`);
+    assert.ok(!slugs.has(slug), `src/content/${kind}/${file}: slug が重複している`);
+    slugs.add(slug);
+    // 必須項目・日付書式・分類は parsePostFile が例外で落とす
+    const post = parsePostFile(kind, slug, readFileSync(join(dir, file), "utf8"));
+    assert.ok(
+      slug.startsWith(post.date.slice(0, 7)),
+      `src/content/${kind}/${file}: ファイル名の年月が frontmatter の date（${post.date}）と違う`,
+    );
+  }
+  postCounts[kind] = files.length;
+}
+// --- 4) 手書きの sitemap.xml が残っていないか（プリレンダが生成する） ---
 try {
   readFileSync(join(repoRoot, "public/sitemap.xml"));
   throw new Error("public/sitemap.xml が残っている。sitemap は scripts/prerender.mjs が生成するので削除する");
@@ -89,4 +116,6 @@ try {
   if (e.code !== "ENOENT") throw e;
 }
 
-console.log(`OK: routes=${seoPaths.length} pages=${checked} （router と routes.ts と各ページの title/description が一致）`);
+console.log(
+  `OK: routes=${seoPaths.length} pages=${checked} news=${postCounts.news} press=${postCounts.press}`,
+);

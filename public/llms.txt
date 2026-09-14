@@ -47,6 +47,7 @@ MobileWash は株式会社HOLY が運営する出張型のカーケアサービ�
 - [プライバシーポリシー](https://mobilewash.app/legal/privacy)
 - [特定商取引法に基づく表記](https://mobilewash.app/legal/consumer-law)
 - [情報セキュリティ方針](https://mobilewash.app/legal/security)
+- [更新情報（RSS）](https://mobilewash.app/feed.xml)
 
 ## 関連サイト
 
