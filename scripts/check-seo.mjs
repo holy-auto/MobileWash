@@ -119,6 +119,46 @@ try {
   if (e.code !== "ENOENT") throw e;
 }
 
+// --- 5) 記事の内容が HTML を壊さないか（プリレンダの差し込み） ---
+// 記事は代表が md で書く。見出しや本文に `</script>` や `$'` が入っても
+// 出力が壊れないことを、実際に通して確かめる。
+{
+  const { jsonLdScript, replaceTag, insertAfter } = await import("./lib/html.mjs");
+
+  const evil = "終了</script><img src=x>";
+  const out = jsonLdScript({ headline: evil });
+  assert.ok(!out.includes("</script>"), "jsonLdScript が </script> を素通しした");
+  assert.equal(JSON.parse(out).headline, evil, "jsonLdScript が値を変えてしまっている");
+
+  // `$'` 等は String.replace の置換文字列で特殊解釈される（文書の一部が混入する）
+  const dollar = "価格は$'お得 $& ${x}";
+  assert.equal(
+    replaceTag("<title>x</title>", /<title>[^<]*<\/title>/, `<title>${dollar}</title>`, "<title>"),
+    `<title>${dollar}</title>`,
+    "replaceTag が $ を特殊解釈している",
+  );
+  assert.equal(insertAfter("<a><b>", "<a>", dollar, "<a>"), `<a>${dollar}<b>`, "insertAfter が $ を特殊解釈している");
+
+  assert.throws(() => replaceTag("<p></p>", /<title>/, "x", "<title>"), /見つからない/);
+  assert.throws(() => insertAfter("<p></p>", "<div>", "x", "<div>"), /見つからない/);
+}
+
+// --- 6) frontmatter の書式（README の例がそのまま通るか） ---
+{
+  const sample = [
+    "---",
+    'date: "2026-10-01"        # 必須。YYYY-MM-DD または YYYY-MM',
+    'category: "お知らせ"        # 必須',
+    'title: "見出し"            # 必須',
+    'description: "本文。"       # 必須',
+    "---",
+  ].join("\n");
+  const post = parsePostFile("news", "2026-10-sample", sample);
+  assert.equal(post.title, "見出し", "frontmatter の行末コメントが読めていない（README の例が通らない）");
+  assert.equal(post.dateLabel, "2026年10月1日");
+  assert.equal(parsePostFile("press", "2026-10-x", sample.replace(/^category:.*$/m, "")).dateLabel, "2026年10月1日");
+}
+
 console.log(
   `OK: routes=${seoPaths.length} pages=${checked} news=${postCounts.news} press=${postCounts.press}`,
 );

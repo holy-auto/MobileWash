@@ -19,6 +19,7 @@ import { readFileSync, writeFileSync, mkdirSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createJiti } from "jiti";
+import { esc, insertAfter, jsonLdScript, replaceTag } from "./lib/html.mjs";
 
 const repoRoot = fileURLToPath(new URL("..", import.meta.url));
 const jiti = createJiti(import.meta.url);
@@ -47,22 +48,6 @@ const POSTS_BY_ROUTE = {
 const ORIGIN = "https://mobilewash.app";
 const OUT = join(repoRoot, "out");
 const LASTMOD = new Date().toISOString().slice(0, 10);
-
-const esc = (s) =>
-  String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-
-/**
- * JSON-LD を <script> に入れる形にする。`</script>` で script が早期終了しないよう
- * `<` を Unicode エスケープする（JSON としては同じ値）。
- */
-function jsonLdScript(value) {
-  return JSON.stringify(value).replace(/</g, "\\u003c");
-}
-
-function replaceTag(html, pattern, replacement, label) {
-  if (!pattern.test(html)) throw new Error(`index.html に ${label} が見つからない（head の構造が変わった可能性）`);
-  return html.replace(pattern, replacement);
-}
 
 const template = readFileSync(join(OUT, "index.html"), "utf8");
 if (!template.includes('<div id="root"></div>')) {
@@ -135,7 +120,8 @@ for (const route of ROUTES) {
     `</div>`,
     `<script>(function(){var r=document.getElementById("root");var p=document.getElementById("prerender-content");var j=document.getElementById("prerender-jsonld");if(!r||!p)return;var n=0;(function c(){n++;if(r.children.length>0){p.remove();if(j)j.remove();return;}if(n<120)requestAnimationFrame(c);})();})();</script>`,
   ].join("\n    ");
-  html = html.replace('<div id="root"></div>', `<div id="root"></div>\n    ${body}`);
+  // 差し込む本文に `$'` 等が入っても壊れないよう、置換文字列ではなく indexOf で入れる
+  html = insertAfter(html, '<div id="root"></div>', `\n    ${body}`, '<div id="root"></div>（本文の差し込み先）');
   if (!html.includes(`<h1>${esc(route.h1)}</h1>`)) {
     throw new Error(`${route.path}: 本文の差し込みに失敗した`);
   }
