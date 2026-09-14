@@ -1,7 +1,9 @@
 import { Link } from 'react-router-dom';
-import { CAMPFIRE_URL } from '@/constants';
+import { CAMPFIRE_URL, GROUP_SITES } from '@/constants';
 
-const footerLinks = [
+type FooterLink = { label: string; href: string; external?: boolean };
+
+const footerLinks: { title: string; links: FooterLink[] }[] = [
   {
     title: 'サービス',
     links: [
@@ -50,6 +52,9 @@ const footerLinks = [
       { label: 'プレスリリース', href: '/company/press' },
       { label: '採用情報', href: '/company/recruit' },
       { label: 'ブランド素材', href: '/company/brand' },
+      { label: '株式会社HOLY（コーポレート）', href: GROUP_SITES.holyInc, external: true },
+      { label: 'Ledra（施工履歴）', href: GROUP_SITES.ledra, external: true },
+      { label: 'HOLY AUTO（施工）', href: GROUP_SITES.holyAuto, external: true },
     ],
   },
 ];
@@ -138,7 +143,17 @@ export default function Footer() {
                   <ul className="space-y-2.5">
                     {col.links.map((link) => (
                       <li key={link.label}>
-                        {link.href.startsWith('/') ? (
+                        {link.external ? (
+                          <a
+                            href={link.href}
+                            target="_blank"
+                            rel="noopener"
+                            className="inline-flex items-center gap-1 text-[12px] text-white/55 hover:text-white transition-colors cursor-pointer"
+                          >
+                            {link.label}
+                            <i className="ri-external-link-line text-[11px]" aria-hidden="true"></i>
+                          </a>
+                        ) : link.href.startsWith('/') ? (
                           <Link
                             to={link.href}
                             className="text-[12px] text-white/55 hover:text-white transition-colors cursor-pointer"
