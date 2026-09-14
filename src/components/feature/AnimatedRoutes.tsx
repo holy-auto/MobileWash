@@ -10,6 +10,11 @@ const PrivacyPolicy = lazy(() => import("@/pages/legal/PrivacyPolicy"));
 const ConsumerLaw = lazy(() => import("@/pages/legal/ConsumerLaw"));
 const SecurityPolicy = lazy(() => import("@/pages/legal/SecurityPolicy"));
 const Sitemap = lazy(() => import("@/pages/Sitemap"));
+const CompanyAbout = lazy(() => import("@/pages/company/about/page"));
+const CompanyNews = lazy(() => import("@/pages/company/news/page"));
+const CompanyPress = lazy(() => import("@/pages/company/press/page"));
+const CompanyRecruit = lazy(() => import("@/pages/company/recruit/page"));
+const CompanyBrand = lazy(() => import("@/pages/company/brand/page"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
 
 function useDirection(pathname: string) {
@@ -92,6 +97,56 @@ export default function AnimatedRoutes() {
             <AnimatedPage>
               <Suspense fallback={<LoadingScreen />}>
                 <Corporate />
+              </Suspense>
+            </AnimatedPage>
+          }
+        />
+        <Route
+          path="/company/about"
+          element={
+            <AnimatedPage>
+              <Suspense fallback={<LoadingScreen />}>
+                <CompanyAbout />
+              </Suspense>
+            </AnimatedPage>
+          }
+        />
+        <Route
+          path="/company/news"
+          element={
+            <AnimatedPage>
+              <Suspense fallback={<LoadingScreen />}>
+                <CompanyNews />
+              </Suspense>
+            </AnimatedPage>
+          }
+        />
+        <Route
+          path="/company/press"
+          element={
+            <AnimatedPage>
+              <Suspense fallback={<LoadingScreen />}>
+                <CompanyPress />
+              </Suspense>
+            </AnimatedPage>
+          }
+        />
+        <Route
+          path="/company/recruit"
+          element={
+            <AnimatedPage>
+              <Suspense fallback={<LoadingScreen />}>
+                <CompanyRecruit />
+              </Suspense>
+            </AnimatedPage>
+          }
+        />
+        <Route
+          path="/company/brand"
+          element={
+            <AnimatedPage>
+              <Suspense fallback={<LoadingScreen />}>
+                <CompanyBrand />
               </Suspense>
             </AnimatedPage>
           }

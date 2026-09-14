@@ -23,7 +23,7 @@
  */
 
 export type RouteSeo = {
-  /** ルート。router/config.tsx の path と一致させる。 */
+  /** ルート。AnimatedRoutes.tsx の path と一致させる（check:seo が突き合わせる）。 */
   path: string;
   title: string;
   description: string;

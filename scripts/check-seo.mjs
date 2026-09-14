@@ -27,7 +27,10 @@ const { ROUTES } = await jiti.import("../src/seo/routes.ts");
 const { parsePostFile } = await jiti.import("../src/content/posts-parse.ts");
 
 // --- 1) routes.ts が router の実ルートを過不足なく覆っているか ---
-const routerPaths = [...read("src/router/config.tsx").matchAll(/path:\s*"([^"]+)"/g)]
+// 実際に描画されるルータは AnimatedRoutes。以前 src/router/config.tsx という
+// どこからも import されていない同種のファイルがあり、この検査はそちらを読んでいた
+// （= 5ページがルータに無いのに検査は通っていた）。dead file は削除済み。
+const routerPaths = [...read("src/components/feature/AnimatedRoutes.tsx").matchAll(/path="([^"]+)"/g)]
   .map((m) => m[1])
   .filter((p) => p !== "*");
 assert.ok(routerPaths.length > 5, `router からルートが取れていない: ${routerPaths.length}`);

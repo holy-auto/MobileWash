@@ -35,7 +35,8 @@ export type Post = {
 };
 
 const FRONTMATTER = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/;
-const FIELD = /^(\w+):\s*(?:"([^"]*)"|'([^']*)')\s*$/;
+// 値は引用符で囲む。行末の `# コメント` は無視する（README の例をそのまま写せるように）。
+const FIELD = /^(\w+):\s*(?:"([^"]*)"|'([^']*)')\s*(?:#.*)?$/;
 
 /** 2024-11-12 → 2024年11月12日 / 2025-10 → 2025年10月 */
 export function formatPostDate(date: string): string {

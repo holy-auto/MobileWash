@@ -51,6 +51,14 @@ const LASTMOD = new Date().toISOString().slice(0, 10);
 const esc = (s) =>
   String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
+/**
+ * JSON-LD を <script> に入れる形にする。`</script>` で script が早期終了しないよう
+ * `<` を Unicode エスケープする（JSON としては同じ値）。
+ */
+function jsonLdScript(value) {
+  return JSON.stringify(value).replace(/</g, "\\u003c");
+}
+
 function replaceTag(html, pattern, replacement, label) {
   if (!pattern.test(html)) throw new Error(`index.html に ${label} が見つからない（head の構造が変わった可能性）`);
   return html.replace(pattern, replacement);
@@ -105,7 +113,7 @@ for (const route of ROUTES) {
   html = replaceTag(
     html,
     /<\/head>/,
-    `  <script type="application/ld+json" id="prerender-jsonld">${JSON.stringify(jsonLd)}</script>\n  </head>`,
+    `  <script type="application/ld+json" id="prerender-jsonld">${jsonLdScript(jsonLd)}</script>\n  </head>`,
     "</head>（JSON-LD の差し込み先）",
   );
 
@@ -174,7 +182,8 @@ writeFileSync(
     `    <atom:link href="${ORIGIN}/feed.xml" rel="self" type="application/rss+xml" />`,
     ...feedItems.flatMap((post) => {
       const link = `${ORIGIN}${post.path}`;
-      // 月までしか分からない記事はその月の1日として配信する（RSS は日付が必須）
+      // 月までしか分からない記事は、その月の1日 0時（JST）として配信する。
+      // RSS の pubDate は GMT 表記なので、前月末日の 15:00 GMT と出る（同じ瞬間）。
       const date = post.date.length === 7 ? `${post.date}-01` : post.date;
       return [
         "    <item>",
