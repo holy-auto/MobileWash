@@ -6,7 +6,7 @@ export default function CompanyPressPage() {
   useEffect(() => {
     document.title = 'プレスリリース | MobileWash';
     const desc = document.querySelector('meta[name="description"]');
-    if (desc) desc.setAttribute('content', '株式会社HOLYのプレスリリース一覧。設立発表、資金調達、全国展開、クラウドファンディング開始など、出張洗車・出張コーティングサービスMobileWashのプレスリリースを掲載しています。');
+    if (desc) desc.setAttribute('content', '株式会社HOLYのプレスリリース一覧。出張洗車・出張コーティングサービス MobileWash に関する公式発表を掲載しています。');
     const canonical = document.querySelector('link[rel="canonical"]');
     if (canonical) canonical.setAttribute('href', 'https://mobilewash.app/company/press');
     window.scrollTo(0, 0);

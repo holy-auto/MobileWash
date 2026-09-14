@@ -133,6 +133,7 @@ export default function CompanyAboutPage() {
           </section>
 
           {/* Licenses */}
+          {companyInfo.licenses.length > 0 && (
           <section className="mt-10 pt-8 border-t border-[#e8ecf0]">
             <h2 className="text-[16px] font-bold text-[#0a2540] mb-4">許認可・届出</h2>
             <ul className="space-y-2.5">
@@ -144,8 +145,10 @@ export default function CompanyAboutPage() {
               ))}
             </ul>
           </section>
+          )}
 
           {/* Banks */}
+          {companyInfo.banks.length > 0 && (
           <section className="mt-10 pt-8 border-t border-[#e8ecf0]">
             <h2 className="text-[16px] font-bold text-[#0a2540] mb-4">取引銀行</h2>
             <ul className="space-y-2.5">
@@ -157,6 +160,7 @@ export default function CompanyAboutPage() {
               ))}
             </ul>
           </section>
+          )}
 
           {/* Mission */}
           <section className="mt-10 pt-8 border-t border-[#e8ecf0]">
