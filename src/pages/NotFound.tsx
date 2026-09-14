@@ -172,7 +172,7 @@ export default function NotFound() {
       <footer className="relative z-20 border-t border-white/[0.06]">
         <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-10 py-6">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-            <p className="text-[11px] text-white/30">© 2026 MobileWash, Inc. All rights reserved.</p>
+            <p className="text-[11px] text-white/30">© 2026 HOLY Inc. All rights reserved.</p>
             <div className="flex gap-x-5 text-[11px] text-white/35">
               <Link to="/legal/terms" className="hover:text-white/70 transition-colors cursor-pointer">利用規約</Link>
               <Link to="/legal/privacy" className="hover:text-white/70 transition-colors cursor-pointer">プライバシーポリシー</Link>

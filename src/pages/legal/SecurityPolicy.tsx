@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 const sections = [
   {
     title: '1. 基本方針',
-    content: `MobileWash株式会社（以下「当社」といいます）は、出張洗車・出張コーティングサービス「MobileWash」の運営にあたり、ユーザーの情報資産を適切に保護し、安全かつ信頼性の高いサービスを提供するため、以下の情報セキュリティ方針を定め、徹底いたします。`,
+    content: `株式会社HOLY（以下「当社」といいます）は、出張洗車・出張コーティングサービス「MobileWash」の運営にあたり、ユーザーの情報資産を適切に保護し、安全かつ信頼性の高いサービスを提供するため、以下の情報セキュリティ方針を定め、徹底いたします。`,
   },
   {
     title: '2. 情報セキュリティ管理組織',
@@ -109,7 +109,7 @@ const sections = [
     title: '11. お問い合わせ',
     content: `本情報セキュリティ方針に関するお問い合わせは、以下の窓口までご連絡ください。`,
     contact: {
-      name: 'MobileWash株式会社 情報セキュリティ担当',
+      name: '株式会社HOLY 情報セキュリティ担当',
       email: 'info@holy-inc.jp',
       phone: '03-4363-3234（平日9:00-18:00）',
     },
@@ -219,7 +219,7 @@ export default function SecurityPolicy() {
       <footer className="bg-[#0a1628] text-white border-t border-white/10">
         <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-10 py-8">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-[11px] text-white/40">© 2026 MobileWash, Inc. All rights reserved.</p>
+            <p className="text-[11px] text-white/40">© 2026 HOLY Inc. All rights reserved.</p>
             <div className="flex gap-x-5 text-[11px] text-white/45">
               <Link to="/legal/terms" className="hover:text-white transition-colors cursor-pointer">利用規約</Link>
               <Link to="/legal/privacy" className="hover:text-white transition-colors cursor-pointer">プライバシーポリシー</Link>

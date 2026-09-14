@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 const sections = [
   {
     title: '1. 適用範囲',
-    content: `本規約は、MobileWash株式会社（以下「当社」といいます）が運営する出張洗車・出張コーティングサービス「MobileWash」（以下「本サービス」といいます）の利用に関し、当社とユーザー（以下「会員」といいます）との間の権利義務関係を定めるものです。会員は、本規約に同意の上、本サービスを利用するものとします。`,
+    content: `本規約は、株式会社HOLY（以下「当社」といいます）が運営する出張洗車・出張コーティングサービス「MobileWash」（以下「本サービス」といいます）の利用に関し、当社とユーザー（以下「会員」といいます）との間の権利義務関係を定めるものです。会員は、本規約に同意の上、本サービスを利用するものとします。`,
   },
   {
     title: '2. 会員登録',
@@ -125,7 +125,7 @@ const sections = [
     title: '16. お問い合わせ',
     content: `本利用規約に関するお問い合わせは、以下の窓口までご連絡ください。`,
     contact: {
-      name: 'MobileWash株式会社 カスタマーサポート',
+      name: '株式会社HOLY カスタマーサポート',
       email: 'info@holy-inc.jp',
       phone: '03-4363-3234（平日9:00-18:00）',
     },
@@ -235,7 +235,7 @@ export default function TermsOfService() {
       <footer className="bg-[#0a1628] text-white border-t border-white/10">
         <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-10 py-8">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-[11px] text-white/40">© 2026 MobileWash, Inc. All rights reserved.</p>
+            <p className="text-[11px] text-white/40">© 2026 HOLY Inc. All rights reserved.</p>
             <div className="flex gap-x-5 text-[11px] text-white/45">
               <Link to="/legal/terms" className="hover:text-white transition-colors cursor-pointer">利用規約</Link>
               <Link to="/legal/privacy" className="hover:text-white transition-colors cursor-pointer">プライバシーポリシー</Link>

@@ -6,7 +6,7 @@ export default function CompanyPressPage() {
   useEffect(() => {
     document.title = 'プレスリリース | MobileWash';
     const desc = document.querySelector('meta[name="description"]');
-    if (desc) desc.setAttribute('content', 'MobileWash株式会社のプレスリリース一覧。設立発表、資金調達、全国展開、クラウドファンディング開始など、出張洗車・出張コーティングサービスMobileWashのプレスリリースを掲載しています。');
+    if (desc) desc.setAttribute('content', '株式会社HOLYのプレスリリース一覧。出張洗車・出張コーティングサービス MobileWash に関する公式発表を掲載しています。');
     const canonical = document.querySelector('link[rel="canonical"]');
     if (canonical) canonical.setAttribute('href', 'https://mobilewash.app/company/press');
     window.scrollTo(0, 0);
@@ -46,7 +46,7 @@ export default function CompanyPressPage() {
           </div>
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight mb-3">プレスリリース</h1>
           <p className="text-[14px] text-white/55 leading-relaxed max-w-2xl">
-            MobileWash株式会社の公式プレスリリースを掲載しています。取材・掲載に関するお問い合わせは info@holy-inc.jp まで。
+            株式会社HOLYの公式プレスリリースを掲載しています。取材・掲載に関するお問い合わせは info@holy-inc.jp まで。
           </p>
         </div>
       </div>
@@ -108,7 +108,7 @@ export default function CompanyPressPage() {
       <footer className="bg-[#0a1628] text-white border-t border-white/10">
         <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-10 py-8">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-[11px] text-white/40">© 2026 MobileWash, Inc. All rights reserved.</p>
+            <p className="text-[11px] text-white/40">© 2026 HOLY Inc. All rights reserved.</p>
             <div className="flex gap-x-5 text-[11px] text-white/45">
               <Link to="/legal/privacy" className="hover:text-white transition-colors cursor-pointer">プライバシーポリシー</Link>
               <Link to="/legal/terms" className="hover:text-white transition-colors cursor-pointer">利用規約</Link>
