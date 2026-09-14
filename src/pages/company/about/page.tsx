@@ -1,6 +1,13 @@
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { companyInfo, mission, vision, values, timeline, officers } from '@/mocks/companyAbout';
+import { GROUP_SITES } from '@/constants';
+
+const RELATED_SITES = [
+  { name: '株式会社HOLY', href: GROUP_SITES.holyInc, desc: '自動車の施工・記録・カーケアを手がけるコーポレートサイト。' },
+  { name: 'Ledra', href: GROUP_SITES.ledra, desc: '自動車整備・コーティング店向けの施工履歴プラットフォーム。' },
+  { name: 'HOLY AUTO', href: GROUP_SITES.holyAuto, desc: 'コーティング・フィルム施工・技術講習。' },
+];
 
 export default function CompanyAboutPage() {
   useEffect(() => {
@@ -217,6 +224,32 @@ export default function CompanyAboutPage() {
                     </div>
                   </div>
                 </div>
+              ))}
+            </div>
+          </section>
+
+          {/* Related sites */}
+          <section className="mt-10 pt-8 border-t border-[#e8ecf0]">
+            <h2 className="text-[16px] font-bold text-[#0a2540] mb-1.5">関連サイト</h2>
+            <p className="text-[12px] text-[#5a6a7a] leading-relaxed mb-5">
+              MobileWash と同じチームが手がけるサービスのサイトです。
+            </p>
+            <div className="grid sm:grid-cols-3 gap-3">
+              {RELATED_SITES.map((site) => (
+                <a
+                  key={site.href}
+                  href={site.href}
+                  target="_blank"
+                  rel="noopener"
+                  aria-label={`${site.name} の公式サイト（新しいタブで開く）`}
+                  className="rounded-xl border border-[#e8ecf0] p-4 hover:border-[#d0dbe6] transition-colors cursor-pointer"
+                >
+                  <p className="flex items-center gap-1.5 text-[13px] font-bold text-[#0a2540]">
+                    {site.name}
+                    <i className="ri-external-link-line text-[12px] text-[#7a8a9a]" aria-hidden="true"></i>
+                  </p>
+                  <p className="text-[12px] text-[#5a6a7a] leading-relaxed mt-1">{site.desc}</p>
+                </a>
               ))}
             </div>
           </section>
