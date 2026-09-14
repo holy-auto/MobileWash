@@ -9,8 +9,7 @@ export const CAMPFIRE_URL = 'https://camp-fire.jp/projects/944308/preview?token=
  * - www.ledra.co.jp … Ledra リポジトリ siteConfig.siteUrl（「canonical は www に統一」とコメント有り）
  * - holy-auto.com   … holy-inc リポジトリが従来から掲載しているURL。canonical の宣言は未確認
  *
- * MobileWash と株式会社HOLY の関係（別法人か一事業ブランドか）は未確定のため、
- * リンクの文言は関係を断定しない。詳細は Ledra の docs/context/OPEN_QUESTIONS.md。
+ * MobileWash は株式会社HOLY の事業ブランド（別法人ではない）。
  */
 export const GROUP_SITES = {
   holyInc: 'https://holy-inc.jp',

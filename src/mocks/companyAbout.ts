@@ -1,12 +1,12 @@
 export const companyInfo = {
-  name: 'MobileWash株式会社',
-  nameEn: 'MobileWash, Inc.',
-  founded: '2025年4月',
-  established: '2025年4月1日',
+  name: '株式会社HOLY',
+  nameEn: 'HOLY Inc.',
+  founded: '2024年11月',
+  established: '2024年11月12日',
   capital: '10万円',
   ceo: '代表取締役 — 堀越 友輔',
   employees: '1名（2026年6月現在、プロ登録者含まず）',
-  address: '〒306-0216 茨城県古河市前林623-1',
+  address: '〒107-0061 東京都港区北青山1-3-1 アールキューブ青山3F',
   phone: '03-4363-3234',
   email: 'info@holy-inc.jp',
   business: [
@@ -63,7 +63,7 @@ export const values = [
 export const timeline = [
   { year: '2024年10月', event: 'MobileWashプロジェクト始動。創業メンバー5名で開発着手' },
   { year: '2025年2月', event: 'プロトタイプ完成。都内限定でクローズドβテスト開始' },
-  { year: '2025年4月', event: 'MobileWash株式会社 設立' },
+  { year: '2025年4月', event: '出張洗車事業「MobileWash」を株式会社HOLYの事業として立ち上げ' },
   { year: '2025年7月', event: 'シードラウンド資金調達完了。開発体制を強化' },
   { year: '2025年10月', event: '東京都内全域でオープンβテスト開始。認定プロ100名突破' },
   { year: '2026年3月', event: 'CAMPFIREにてクラウドファンディング開始。全国47都道府県のプロ登録受付開始' },

@@ -11,7 +11,7 @@ export default function CompanyRecruitPage() {
   useEffect(() => {
     document.title = '採用情報 | MobileWash';
     const desc = document.querySelector('meta[name="description"]');
-    if (desc) desc.setAttribute('content', 'MobileWash株式会社の採用情報。エンジニア・マーケティングの採用ポジション、会社の文化、福利厚生。出張洗車・出張コーティングのスタートアップで新しいカーケア体験を一緒に創りませんか。');
+    if (desc) desc.setAttribute('content', '株式会社HOLYの採用情報。エンジニア・マーケティングの採用ポジション、会社の文化、福利厚生。出張洗車・出張コーティングのスタートアップで新しいカーケア体験を一緒に創りませんか。');
     const canonical = document.querySelector('link[rel="canonical"]');
     if (canonical) canonical.setAttribute('href', 'https://mobilewash.app/company/recruit');
     window.scrollTo(0, 0);
@@ -234,7 +234,7 @@ export default function CompanyRecruitPage() {
       <footer className="bg-[#0a1628] text-white border-t border-white/10">
         <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-10 py-8">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-[11px] text-white/40">© 2026 MobileWash, Inc. All rights reserved.</p>
+            <p className="text-[11px] text-white/40">© 2026 HOLY Inc. All rights reserved.</p>
             <div className="flex gap-x-5 text-[11px] text-white/45">
               <Link to="/legal/privacy" className="hover:text-white transition-colors cursor-pointer">プライバシーポリシー</Link>
               <Link to="/legal/terms" className="hover:text-white transition-colors cursor-pointer">利用規約</Link>

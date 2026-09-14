@@ -52,7 +52,7 @@ const footerLinks: { title: string; links: FooterLink[] }[] = [
       { label: 'プレスリリース', href: '/company/press' },
       { label: '採用情報', href: '/company/recruit' },
       { label: 'ブランド素材', href: '/company/brand' },
-      { label: '株式会社HOLY（コーポレート）', href: GROUP_SITES.holyInc, external: true },
+      { label: '運営会社：株式会社HOLY', href: GROUP_SITES.holyInc, external: true },
       { label: 'Ledra（施工履歴）', href: GROUP_SITES.ledra, external: true },
       { label: 'HOLY AUTO（施工）', href: GROUP_SITES.holyAuto, external: true },
     ],
@@ -296,7 +296,7 @@ export default function Footer() {
               <Link to="/legal/security" className="hover:text-white transition-colors cursor-pointer">情報セキュリティ方針</Link>
               <Link to="/sitemap" className="hover:text-white transition-colors cursor-pointer">サイトマップ</Link>
             </div>
-            <p className="text-[11px] text-white/40">© 2026 MobileWash, Inc. All rights reserved.</p>
+            <p className="text-[11px] text-white/40">© 2026 HOLY Inc. All rights reserved.</p>
           </div>
         </div>
       </div>

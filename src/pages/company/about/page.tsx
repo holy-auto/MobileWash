@@ -4,7 +4,7 @@ import { companyInfo, mission, vision, values, timeline, officers } from '@/mock
 import { GROUP_SITES } from '@/constants';
 
 const RELATED_SITES = [
-  { name: '株式会社HOLY', href: GROUP_SITES.holyInc, desc: '自動車の施工・記録・カーケアを手がけるコーポレートサイト。' },
+  { name: '株式会社HOLY', href: GROUP_SITES.holyInc, desc: 'MobileWash の運営会社。自動車の施工・記録・カーケアを手がける。' },
   { name: 'Ledra', href: GROUP_SITES.ledra, desc: '自動車整備・コーティング店向けの施工履歴プラットフォーム。' },
   { name: 'HOLY AUTO', href: GROUP_SITES.holyAuto, desc: 'コーティング・フィルム施工・技術講習。' },
 ];
@@ -13,7 +13,7 @@ export default function CompanyAboutPage() {
   useEffect(() => {
     document.title = '会社概要 | MobileWash';
     const desc = document.querySelector('meta[name="description"]');
-    if (desc) desc.setAttribute('content', 'MobileWash株式会社の会社概要。ミッション・ビジョン・バリュー、沿革、役員情報、事業内容。出張洗車・出張コーティングサービスを運営するMobileWashの企業情報ページです。');
+    if (desc) desc.setAttribute('content', '株式会社HOLYの会社概要。ミッション・ビジョン・バリュー、沿革、役員情報、事業内容。出張洗車・出張コーティングサービスを運営するMobileWashの企業情報ページです。');
     const canonical = document.querySelector('link[rel="canonical"]');
     if (canonical) canonical.setAttribute('href', 'https://mobilewash.app/company/about');
     window.scrollTo(0, 0);
@@ -24,16 +24,16 @@ export default function CompanyAboutPage() {
     script.text = JSON.stringify({
       '@context': 'https://schema.org',
       '@type': 'Organization',
-      name: 'MobileWash株式会社',
+      name: '株式会社HOLY',
       url: 'https://mobilewash.app/',
       logo: 'https://storage.readdy-site.link/project_files/c40f971a-8995-4350-8e33-e7b8168d5850/60df7e55-3821-4161-a8bd-e386660f21ef_mobile_wash_app_icon.png?v=1a084e8094f7ad1f039da984d9cffe58',
       foundingDate: '2025-04-01',
       address: {
         '@type': 'PostalAddress',
-        streetAddress: '前林623-1',
-        addressLocality: '古河市',
-        addressRegion: '茨城県',
-        postalCode: '306-0216',
+        streetAddress: '北青山1-3-1 アールキューブ青山3F',
+        addressLocality: '港区',
+        addressRegion: '東京都',
+        postalCode: '107-0061',
         addressCountry: 'JP',
       },
       contactPoint: {
@@ -232,7 +232,7 @@ export default function CompanyAboutPage() {
           <section className="mt-10 pt-8 border-t border-[#e8ecf0]">
             <h2 className="text-[16px] font-bold text-[#0a2540] mb-1.5">関連サイト</h2>
             <p className="text-[12px] text-[#5a6a7a] leading-relaxed mb-5">
-              MobileWash と同じチームが手がけるサービスのサイトです。
+              MobileWash を運営する株式会社HOLY と、同社が手がける他サービスのサイトです。
             </p>
             <div className="grid sm:grid-cols-3 gap-3">
               {RELATED_SITES.map((site) => (
@@ -271,7 +271,7 @@ export default function CompanyAboutPage() {
       <footer className="bg-[#0a1628] text-white border-t border-white/10">
         <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-10 py-8">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-[11px] text-white/40">© 2026 MobileWash, Inc. All rights reserved.</p>
+            <p className="text-[11px] text-white/40">© 2026 HOLY Inc. All rights reserved.</p>
             <div className="flex gap-x-5 text-[11px] text-white/45">
               <Link to="/legal/privacy" className="hover:text-white transition-colors cursor-pointer">プライバシーポリシー</Link>
               <Link to="/legal/terms" className="hover:text-white transition-colors cursor-pointer">利用規約</Link>
