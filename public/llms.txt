@@ -1,0 +1,56 @@
+# MobileWash
+
+> 出張洗車・出張コーティングサービス。プロがお客様の指定場所へ伺い、洗車・コーティング・内装クリーニングを行います。
+
+MobileWash は株式会社HOLY が運営する出張型のカーケアサービスです。
+店舗に車を持ち込むのではなく、自宅や職場の駐車場にプロが出向いて施工します。
+
+## 現在の状況
+
+2026年Q3 の正式ローンチに向けて準備中です。施工実績・利用者評価は
+ローンチ後に公開します。現時点で公開しているのは、提供予定のサービス内容・
+料金プラン・対応予定エリアと、プロフェッショナルの登録受付です。
+
+## サービスメニュー（税込・出張料込みの目安価格）
+
+- 出張手洗い洗車 ¥3,980〜
+- 出張内装クリーニング ¥6,980〜
+- エンジンルーム洗浄 ¥9,800〜
+- 出張ポリッシュ磨き ¥12,800〜
+- 出張ガラスコーティング ¥29,800〜
+- フルディテイリング ¥49,800〜
+
+## 料金プラン
+
+- 都度払い — 使いたいときだけ。1回から利用可
+- 定額ライト ¥2,980/月 — 月1回の出張手洗い洗車込み
+- 定額プレミアム ¥9,800/月 — 月4回の出張手洗い洗車 ＋ 年1回のガラスコーティング込み
+- 法人プラン — 5台以上の車両管理向け。専任担当による相談・資料請求に対応
+
+## 運営会社
+
+株式会社HOLY（東京都港区北青山1-3-1 アールキューブ青山3F / 2024年11月12日設立 /
+代表取締役 堀越友輔）。自動車のコーティング・フィルム施工・技術講習（HOLY AUTO）、
+施工履歴プラットフォーム（Ledra）、出張洗車（MobileWash）の3事業を展開しています。
+
+## Links
+
+- [トップページ](https://mobilewash.app/)
+- [法人・フリート向けプラン](https://mobilewash.app/corporate)
+- [会社概要](https://mobilewash.app/company/about)
+- [お知らせ](https://mobilewash.app/company/news)
+- [プレスリリース](https://mobilewash.app/company/press)
+- [採用情報](https://mobilewash.app/company/recruit)
+- [ブランド素材](https://mobilewash.app/company/brand)
+- [サイトマップ](https://mobilewash.app/sitemap)
+- [利用規約](https://mobilewash.app/legal/terms)
+- [プライバシーポリシー](https://mobilewash.app/legal/privacy)
+- [特定商取引法に基づく表記](https://mobilewash.app/legal/consumer-law)
+- [情報セキュリティ方針](https://mobilewash.app/legal/security)
+- [更新情報（RSS）](https://mobilewash.app/feed.xml)
+
+## 関連サイト
+
+- [株式会社HOLY（運営会社）](https://holy-inc.jp)
+- [Ledra（施工履歴プラットフォーム）](https://www.ledra.co.jp)
+- [HOLY AUTO（コーティング・フィルム施工）](https://holy-auto.com)

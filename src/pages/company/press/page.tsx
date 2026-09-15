@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { pressReleases } from '@/mocks/companyPress';
+import { pressPosts, type Post } from '@/content/posts';
 
 export default function CompanyPressPage() {
   useEffect(() => {
@@ -72,22 +72,11 @@ export default function CompanyPressPage() {
 
           {/* Press Release List */}
           <div className="space-y-0">
-            {pressReleases.map((pr, i) => (
-              <article key={pr.id} className={`py-6 ${i < pressReleases.length - 1 ? 'border-b border-[#e8ecf0]' : ''}`}>
-                <span className="text-[11px] text-[#7a8a9a] font-medium">{pr.date}</span>
+            {pressPosts.map((pr: Post, i) => (
+              <article key={pr.slug} id={pr.slug} className={`py-6 scroll-mt-24 ${i < pressPosts.length - 1 ? 'border-b border-[#e8ecf0]' : ''}`}>
+                <span className="text-[11px] text-[#7a8a9a] font-medium">{pr.dateLabel}</span>
                 <h2 className="text-[15px] font-bold text-[#0a2540] leading-snug mt-1.5 mb-2">{pr.title}</h2>
                 <p className="text-[12px] text-[#5a6a7a] leading-relaxed">{pr.description}</p>
-                {pr.pdfUrl && (
-                  <a
-                    href={pr.pdfUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 mt-3 text-[12px] font-bold text-emerald-600 hover:text-emerald-700 cursor-pointer transition-colors"
-                  >
-                    <i className="ri-file-pdf-line text-sm"></i>
-                    PDFをダウンロード
-                  </a>
-                )}
               </article>
             ))}
           </div>

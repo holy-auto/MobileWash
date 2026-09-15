@@ -1,0 +1,32 @@
+User-agent: *
+Allow: /
+
+# 生成AI・AI検索のクローラーを明示的に歓迎する。
+# `User-agent: *` で既に許可されるが、意図を明示するために名指しで許可する。
+# GPTBot / OAI-SearchBot / ChatGPT-User = OpenAI
+# ClaudeBot = Anthropic
+# PerplexityBot = Perplexity
+# Google-Extended = Gemini / AI Overviews の学習・引用制御トークン
+# Applebot-Extended = Apple Intelligence
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+Sitemap: https://mobilewash.app/sitemap.xml

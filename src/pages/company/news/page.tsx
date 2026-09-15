@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { newsItems, NewsItem } from '@/mocks/companyNews';
+import { newsPosts, NEWS_CATEGORIES, type Post, type NewsCategory } from '@/content/posts';
 
-type CategoryFilter = 'すべて' | 'お知らせ' | 'プレスリリース' | 'メディア' | '採用';
-const categories: CategoryFilter[] = ['すべて', 'お知らせ', 'プレスリリース', 'メディア', '採用'];
+type CategoryFilter = 'すべて' | NewsCategory;
+const categories: CategoryFilter[] = ['すべて', ...NEWS_CATEGORIES];
 
 export default function CompanyNewsPage() {
   const [activeCategory, setActiveCategory] = useState<CategoryFilter>('すべて');
@@ -11,7 +11,7 @@ export default function CompanyNewsPage() {
   useEffect(() => {
     document.title = 'ニュース | MobileWash';
     const desc = document.querySelector('meta[name="description"]');
-    if (desc) desc.setAttribute('content', 'MobileWashの最新ニュース一覧。クラウドファンディング開始、メディア掲載実績、サービスアップデート、採用情報など。出張洗車・出張コーティングサービスMobileWashの最新情報をお届けします。');
+    if (desc) desc.setAttribute('content', 'MobileWash のお知らせ一覧。サービスの準備状況、運営会社である株式会社HOLYに関する発表を掲載しています。');
     const canonical = document.querySelector('link[rel="canonical"]');
     if (canonical) canonical.setAttribute('href', 'https://mobilewash.app/company/news');
     window.scrollTo(0, 0);
@@ -21,8 +21,8 @@ export default function CompanyNewsPage() {
   }, []);
 
   const filteredNews = activeCategory === 'すべて'
-    ? newsItems
-    : newsItems.filter((item) => item.category === activeCategory);
+    ? newsPosts
+    : newsPosts.filter((item) => item.category === activeCategory);
 
   return (
     <div className="min-h-screen bg-[#fafbfc] text-[#0a2540]">
@@ -83,21 +83,12 @@ export default function CompanyNewsPage() {
 
           {/* News List */}
           <div className="space-y-0">
-            {filteredNews.map((item: NewsItem) => (
-              <article key={item.id} className="py-5 border-b border-[#e8ecf0] last:border-b-0">
+            {filteredNews.map((item: Post) => (
+              <article key={item.slug} id={item.slug} className="py-5 border-b border-[#e8ecf0] last:border-b-0 scroll-mt-24">
                 <div className="flex flex-col sm:flex-row sm:items-start gap-4">
-                  {item.imageUrl && (
-                    <div className="w-full sm:w-48 h-32 rounded-lg overflow-hidden shrink-0">
-                      <img
-                        src={item.imageUrl}
-                        alt={item.title}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  )}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2.5 mb-1.5">
-                      <span className="text-[11px] text-[#7a8a9a]">{item.date}</span>
+                      <span className="text-[11px] text-[#7a8a9a]">{item.dateLabel}</span>
                       <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap ${
                         item.category === 'お知らせ' ? 'bg-blue-50 text-blue-600' :
                         item.category === 'プレスリリース' ? 'bg-emerald-50 text-emerald-600' :
