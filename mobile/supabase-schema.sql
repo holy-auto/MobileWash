@@ -1094,7 +1094,35 @@ CREATE POLICY "Users can create requests" ON area_requests FOR INSERT WITH CHECK
 CREATE INDEX idx_area_requests_location ON area_requests (prefecture, city);
 
 -- ============================================
--- 35. Realtime subscriptions
+-- 35. Pro Training Registrations (初期講習費用 — 先着100名半額キャンペーン)
+-- ============================================
+CREATE TABLE training_registrations (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  pro_id UUID NOT NULL UNIQUE REFERENCES profiles(id) ON DELETE CASCADE,
+  experience_level TEXT NOT NULL,
+  sequence_number INT NOT NULL UNIQUE,  -- 何番目の登録か（先着100名判定に使用）
+  base_fee INT NOT NULL,                -- 通常¥100,000 / 先着100名は¥50,000
+  early_bird_applied BOOLEAN NOT NULL DEFAULT FALSE,
+  kit_fee INT NOT NULL DEFAULT 0,       -- 未経験者向け道具セット代 ¥20,000
+  total_fee INT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'pending_payment' CHECK (status IN ('pending_payment', 'paid')),
+  stripe_payment_intent_id TEXT,
+  paid_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE training_registrations ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Pros can view own training registration" ON training_registrations FOR SELECT USING (auth.uid() = pro_id);
+CREATE POLICY "Pros can register for training" ON training_registrations FOR INSERT WITH CHECK (auth.uid() = pro_id);
+CREATE POLICY "Admins can manage training registrations" ON training_registrations FOR ALL USING (
+  EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
+);
+
+CREATE INDEX idx_training_registrations_pro ON training_registrations (pro_id);
+CREATE INDEX idx_training_registrations_sequence ON training_registrations (sequence_number);
+
+-- ============================================
+-- 36. Realtime subscriptions
 -- ============================================
 ALTER PUBLICATION supabase_realtime ADD TABLE orders;
 ALTER PUBLICATION supabase_realtime ADD TABLE pro_profiles;
