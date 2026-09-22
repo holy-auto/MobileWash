@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import CountdownBadge from './CountdownBadge';
 import { CAMPFIRE_URL } from '@/constants';
 
 const BG_IMAGE = 'https://readdy.ai/api/search-image?query=A%20professional%20car%20detailer%20in%20a%20clean%20uniform%20carefully%20hand%20washing%20a%20sleek%20black%20luxury%20sedan%20in%20a%20modern%20residential%20driveway%20at%20golden%20hour%2C%20warm%20sunlight%20reflecting%20off%20the%20perfectly%20clean%20car%20surface%2C%20water%20droplets%20glistening%2C%20lush%20green%20suburban%20background%2C%20cinematic%20wide%20shot%2C%20premium%20lifestyle%20photography%2C%20deep%20rich%20colors%2C%20dramatic%20lighting&width=1600&height=900&seq=hero-bg-1&orientation=landscape';
@@ -53,11 +52,6 @@ export default function Hero() {
 
             {/* Left — text */}
             <div className="lg:col-span-6 xl:col-span-5">
-              {/* Crowdfunding countdown */}
-              <div className="mb-5 md:mb-6">
-                <CountdownBadge />
-              </div>
-
               <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 text-white text-[10px] md:text-[11px] font-bold px-3 py-1.5 rounded-full mb-5 md:mb-7">
                 <span className="w-1.5 h-1.5 bg-[#00b4ff] rounded-full animate-pulse"></span>
                 出張洗車アプリ / 2026年Q3 正式ローンチ予定
