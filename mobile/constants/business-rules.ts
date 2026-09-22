@@ -680,6 +680,19 @@ export const AREA_REQUEST = {
   REQUEST_COOLDOWN_DAYS: 30,     // 同ユーザーから同エリアへの再リクエストは30日後
 } as const;
 
+// --- Pro Training Fee (初期講習費用) ---
+export const PRO_TRAINING = {
+  // 通常の初期講習費用
+  BASE_FEE: 100000,
+  // 先着キャンペーン（初回登録N名まで半額）
+  EARLY_BIRD_LIMIT: 100,
+  EARLY_BIRD_DISCOUNT_PERCENT: 50,
+  EARLY_BIRD_FEE: 50000, // BASE_FEE * (1 - EARLY_BIRD_DISCOUNT_PERCENT / 100)
+  // 未経験者向け道具セット（希望者のみ、講習とあわせて購入）
+  BEGINNER_KIT_FEE: 20000,
+  BEGINNER_EXPERIENCE_LEVEL: 'beginner', // ProRecruit.tsxの「未経験 / 学習中」に対応
+} as const;
+
 // --- i18n (多言語) ---
 export const I18N = {
   DEFAULT_LOCALE: 'ja',

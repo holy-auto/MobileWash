@@ -134,9 +134,11 @@ function IncomeSimulator() {
 
 export default function ProRecruit() {
   const [selected, setSelected] = useState<string[]>([]);
+  const [experience, setExperience] = useState('');
   const [agreed, setAgreed] = useState(false);
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [msg, setMsg] = useState('');
+  const isBeginner = experience === 'beginner';
   const section = useScrollAnimation({ threshold: 0.04 });
   const benefitsAnim = useScrollAnimation({ threshold: 0.1 });
   const stepsAnim = useScrollAnimation({ threshold: 0.1 });
@@ -208,7 +210,7 @@ export default function ProRecruit() {
               <div className="flex flex-wrap gap-4 lg:flex-col lg:items-end shrink-0">
                 {[
                   { val: '90%', label: '還元率（業界最高水準）', icon: 'ri-percent-line' },
-                  { val: '¥0', label: '登録費用・初期費用', icon: 'ri-money-dollar-circle-line' },
+                  { val: '¥100,000', label: '初期講習費用（先着100名は¥50,000）', icon: 'ri-money-dollar-circle-line' },
                   { val: '47', label: '都道府県で募集中', icon: 'ri-map-pin-line' },
                 ].map(s => (
                   <div key={s.label} className="flex items-center gap-3 bg-white/8 border border-white/10 rounded-xl px-4 py-2.5">
@@ -298,7 +300,7 @@ export default function ProRecruit() {
                     登録者には優先案内・研修招待・初期報酬アップを提供
                   </p>
                   <div className="flex flex-wrap gap-2 mt-3">
-                    {['優先案内', '研修招待', '初期報酬UP', '登録費¥0'].map(tag => (
+                    {['優先案内', '研修招待', '初期報酬UP', '先着100名 講習費半額'].map(tag => (
                       <span key={tag} className="text-[10px] font-bold bg-white/20 text-white px-2.5 py-1 rounded-full">
                         {tag}
                       </span>
@@ -380,7 +382,12 @@ export default function ProRecruit() {
                       </div>
                       <div>
                         <label className="block text-[12px] font-bold text-[#0a2540] mb-1.5">経験年数</label>
-                        <select name="experience" className="w-full px-4 py-3 rounded-xl text-[14px] text-[#0a2540] bg-[#f7fafd] border border-[#e4eef7] focus:outline-none focus:ring-2 focus:ring-[#00b4ff]/30 focus:border-[#00b4ff] transition-all">
+                        <select
+                          name="experience"
+                          value={experience}
+                          onChange={e => setExperience(e.target.value)}
+                          className="w-full px-4 py-3 rounded-xl text-[14px] text-[#0a2540] bg-[#f7fafd] border border-[#e4eef7] focus:outline-none focus:ring-2 focus:ring-[#00b4ff]/30 focus:border-[#00b4ff] transition-all"
+                        >
                           <option value="">選択してください</option>
                           <option value="beginner">未経験 / 学習中</option>
                           <option value="1-3">1〜3年</option>
@@ -390,6 +397,14 @@ export default function ProRecruit() {
                         </select>
                       </div>
                     </div>
+                    {isBeginner && (
+                      <div className="flex items-start gap-2.5 bg-[#00b4ff]/8 border border-[#00b4ff]/20 rounded-xl px-4 py-3">
+                        <i className="ri-tools-line text-[#00b4ff] text-sm mt-0.5"></i>
+                        <p className="text-[11px] text-[#0a2540] leading-relaxed">
+                          未経験の方は、講習費用に<span className="font-bold">+¥20,000</span>で洗車・コーティング道具一式をお渡しするプランをご案内します。
+                        </p>
+                      </div>
+                    )}
                     <fieldset>
                       <legend className="block text-[12px] font-bold text-[#0a2540] mb-2">得意なメニュー（複数選択可）</legend>
                       <div className="flex flex-wrap gap-2">
@@ -437,7 +452,8 @@ export default function ProRecruit() {
                       )}
                     </button>
                     <p className="text-[11px] text-[#8ba0ba] text-center">
-                      登録費用・初期費用は一切かかりません
+                      初期講習費用 ¥100,000（先着100名様は半額¥50,000）
+                      {isBeginner && <>・道具セット希望の方は+¥20,000</>}
                     </p>
                   </form>
                 )}
