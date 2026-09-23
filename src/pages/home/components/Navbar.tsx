@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { CAMPFIRE_URL } from '@/constants';
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -112,30 +111,6 @@ export default function Navbar() {
             })}
           </nav>
 
-          {/* Desktop CTA */}
-          <div className="hidden lg:flex items-center gap-2.5">
-            <a
-              href={CAMPFIRE_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`text-[13px] font-bold px-5 py-2.5 rounded-full transition-colors cursor-pointer whitespace-nowrap border ${
-                scrolled
-                  ? 'text-[#0099e6] border-[#0099e6] hover:bg-[#e6f4ff]'
-                  : 'text-white border-white/40 hover:bg-white/10'
-              }`}
-            >
-              プロジェクトを見る
-            </a>
-            <a
-              href={CAMPFIRE_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[13px] font-bold text-white bg-[#0099e6] hover:bg-[#0077b3] px-5 py-2.5 rounded-full transition-colors cursor-pointer whitespace-nowrap"
-            >
-              CAMPFIREで応援する
-            </a>
-          </div>
-
           {/* Mobile menu button */}
           <button
             className="lg:hidden p-2 -mr-2 cursor-pointer"
@@ -173,14 +148,6 @@ export default function Navbar() {
               </a>
             );
           })}
-          <div className="flex gap-2 pt-3">
-            <a href={CAMPFIRE_URL} target="_blank" rel="noopener noreferrer" onClick={() => setMobileOpen(false)} className="flex-1 text-center text-[13px] font-bold text-[#0099e6] border border-[#0099e6] px-4 py-3 rounded-full cursor-pointer whitespace-nowrap">
-              プロジェクトを見る
-            </a>
-            <a href={CAMPFIRE_URL} target="_blank" rel="noopener noreferrer" onClick={() => setMobileOpen(false)} className="flex-1 text-center text-[13px] font-bold text-white bg-[#0099e6] px-4 py-3 rounded-full cursor-pointer whitespace-nowrap">
-              応援する
-            </a>
-          </div>
         </div>
       )}
     </header>
