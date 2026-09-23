@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { CAMPFIRE_URL, GROUP_SITES } from '@/constants';
+import { GROUP_SITES } from '@/constants';
 
 type FooterLink = { label: string; href: string; external?: boolean };
 
@@ -120,18 +120,9 @@ export default function Footer() {
                 <p className="text-white/40 text-[10px] tracking-widest mt-0.5">MOBILE CAR WASH &amp; COATING</p>
               </div>
             </a>
-            <p className="text-[13px] text-white/65 leading-relaxed mb-6 max-w-xs">
+            <p className="text-[13px] text-white/65 leading-relaxed mb-8 max-w-xs">
               出張洗車・出張コーティングのプロを、あなたの元へ。スマホひとつで、車のお手入れを変えていきます。
             </p>
-            <a
-              href={CAMPFIRE_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 bg-white text-[#0a1628] font-bold px-5 py-3 rounded-full text-[13px] hover:bg-[#e6f4ff] transition-colors mb-8 cursor-pointer whitespace-nowrap"
-            >
-              <i className="ri-heart-add-line text-sm"></i>
-              CAMPFIREで応援する
-            </a>
           </div>
 
           {/* Links Columns */}

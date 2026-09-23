@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { CAMPFIRE_URL } from '@/constants';
 
 const BG_IMAGE = 'https://readdy.ai/api/search-image?query=A%20professional%20car%20detailer%20in%20a%20clean%20uniform%20carefully%20hand%20washing%20a%20sleek%20black%20luxury%20sedan%20in%20a%20modern%20residential%20driveway%20at%20golden%20hour%2C%20warm%20sunlight%20reflecting%20off%20the%20perfectly%20clean%20car%20surface%2C%20water%20droplets%20glistening%2C%20lush%20green%20suburban%20background%2C%20cinematic%20wide%20shot%2C%20premium%20lifestyle%20photography%2C%20deep%20rich%20colors%2C%20dramatic%20lighting&width=1600&height=900&seq=hero-bg-1&orientation=landscape';
 
@@ -69,17 +68,8 @@ export default function Hero() {
 
               <div className="flex flex-col sm:flex-row gap-3 mb-12">
                 <a
-                  href={CAMPFIRE_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-2 bg-[#00b4ff] hover:bg-[#0099e6] text-white font-bold px-8 py-4 rounded-full transition-colors text-[15px] cursor-pointer whitespace-nowrap"
-                >
-                  <i className="ri-heart-add-line"></i>
-                  クラファンで応援する
-                </a>
-                <a
                   href="#how-it-works"
-                  className="inline-flex items-center justify-center bg-white/10 backdrop-blur-sm border border-white/30 hover:bg-white/20 text-white font-bold px-8 py-4 rounded-full transition-colors text-[15px] cursor-pointer whitespace-nowrap"
+                  className="inline-flex items-center justify-center bg-[#00b4ff] hover:bg-[#0099e6] text-white font-bold px-8 py-4 rounded-full transition-colors text-[15px] cursor-pointer whitespace-nowrap"
                 >
                   サービスを見る
                 </a>
